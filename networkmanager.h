@@ -1,0 +1,22 @@
+#ifndef NETWORKMANAGER_H
+#define NETWORKMANAGER_H
+
+#include <QObject>
+#include "tcpconnector.h"
+#include "Utils.h"
+class NetworkManager : public QObject
+{
+    Q_OBJECT
+public:
+    explicit NetworkManager(QObject *parent = nullptr);
+
+signals:
+    void transmitCommand(ServerCommand cmd);
+public slots:
+
+
+private:
+    TcpConnector* m_tcpConnector;
+};
+
+#endif // NETWORKMANAGER_H
