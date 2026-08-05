@@ -15,23 +15,44 @@ TcpConnector::TcpConnector(QObject *parent,const QHostAddress &address, quint16 
     }
 }
 
-QString TcpConnector::GetMessageFromCommand(const ClientResponse &resp)
+QString TcpConnector::GetMessageFromCommand(ClientResponse resp)
 {
-    switch (resp) {
+    switch (resp)
+    {
     case ClientResponse::ConnectionSuccess:
-        return "[Pi Response]: Connection Established Successfully!";
+        return QString("[Pi Response]: Connection Established Successfully!");
+
     case ClientResponse::StreamStarted:
-        return "[Pi Response]: Streaming started on remote device.";
+        return QString("[Pi Response]: Streaming started on remote device.");
+
     case ClientResponse::StreamStopped:
-        return "[Pi Response]: Streaming stopped.";
+        return QString("[Pi Response]: Streaming stopped.");
+
     case ClientResponse::ErrorDeviceBusy:
-        return "[Pi Response Error]: Device is busy!";
+        return QString("[Pi Response Error]: Device is busy!");
+
     case ClientResponse::Pong:
-        return "[Pi Response]: Pong received.";
+        return QString("[Pi Response]: Pong received.");
+
     case ClientResponse::ConnectionEnded:
-        return "[Pi Response]: Client requested connection end.";
+        return QString("[Pi Response]: Client requested connection end.");
+
     default:
-        return "[Pi Response]: Unknown command byte received.";
+        return QString("[Pi Response]: Unknown command byte received.");
+    }
+}
+
+void TcpConnector::handleStates(const ClientResponse resp)
+{
+    switch(resp)
+    {
+    case ClientResponse::StreamStarted:
+        emit streamApproved();
+        break;
+    case ClientResponse::StreamStopped:
+        emit streamStopped();
+    default:
+        break;
     }
 }
 
@@ -39,12 +60,10 @@ void TcpConnector::onNewConnection()
 {
     m_activeClient = server->nextPendingConnection();
     qDebug()<<"new client connected!!!";
-
+    m_activeClient->setSocketOption(QAbstractSocket::LowDelayOption, 1);
     connect(m_activeClient,&QTcpSocket::readyRead,this,&TcpConnector::onReadyRead);
     connect(m_activeClient ,&QTcpSocket::disconnected,this,&TcpConnector::onSocketDisconnected);
 
-    // s->write("Hello from qt tcp server\n");
-    // s->flush();
 }
 
 void TcpConnector::onReadyRead()
@@ -53,9 +72,10 @@ void TcpConnector::onReadyRead()
     if(!s)return;
     QByteArray data = s->readAll();
     if (data.isEmpty()) return;
-    ClientResponse resp = static_cast<ClientResponse>(data[0]);
-    QString str = GetMessageFromCommand(resp);
-    std::cout << "Received command: " << str.toStdString() << std::endl;
+    uint8_t value = static_cast<uint8_t>(data.at(0));
+    ClientResponse resp = static_cast<ClientResponse>(value);
+    qDebug() << GetMessageFromCommand(resp);
+    handleStates(resp);
 }
 
 void TcpConnector::onSocketDisconnected()

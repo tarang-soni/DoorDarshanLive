@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Network)
 
-qt_standard_project_setup(REQUIRES 6.10)
+qt_standard_project_setup(REQUIRES 6.11)
 
 qt_add_executable(appqt_DoorDarshanLive
     main.cpp
@@ -23,6 +23,9 @@ qt_add_qml_module(appqt_DoorDarshanLive
         SOURCES uimanager.h uimanager.cpp
         SOURCES tcpconnector.h tcpconnector.cpp
         SOURCES Utils.h
+        SOURCES videobridge.h videobridge.cpp
+        SOURCES
+        SOURCES cameraimageprovider.h cameraimageprovider.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -36,12 +39,36 @@ set_target_properties(appqt_DoorDarshanLive PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appqt_DoorDarshanLive
-    PRIVATE Qt6::Quick
+target_link_libraries(appqt_DoorDarshanLive PRIVATE
+    Qt6::Quick
+    Qt6::Network
 )
-
 install(TARGETS appqt_DoorDarshanLive
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(GST REQUIRED
+        gstreamer-1.0
+        gstreamer-video-1.0
+        gstreamer-app-1.0
+)
+
+target_include_directories(appqt_DoorDarshanLive PRIVATE
+        ${GST_INCLUDE_DIRS}
+)
+
+target_compile_options(appqt_DoorDarshanLive PRIVATE
+        ${GST_CFLAGS_OTHER}
+)
+
+target_link_directories(appqt_DoorDarshanLive PRIVATE
+        ${GST_LIBRARY_DIRS}
+)
+
+target_link_libraries(appqt_DoorDarshanLive PRIVATE
+        ${GST_LIBRARIES}
 )

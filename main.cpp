@@ -2,13 +2,21 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "appcontroller.h"
+#include "cameraimageprovider.h"
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
     AppController m_appController;
+    engine.rootContext()->setContextProperty(
+        "videoBridge",
+        m_appController.videoBridge());
 
+    engine.addImageProvider(
+        "camera",
+        new CameraImageProvider(
+            m_appController.videoBridge()));
     engine.rootContext()->setContextProperty("uiManager",&m_appController.getUiManager());
     QObject::connect(
         &engine,

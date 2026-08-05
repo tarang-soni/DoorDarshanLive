@@ -13,7 +13,8 @@ public:
     explicit TcpConnector(QObject *parent = nullptr,const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
 
 private:
-    QString GetMessageFromCommand(const ClientResponse& resp);
+    QString GetMessageFromCommand(const ClientResponse resp);
+    void handleStates(const ClientResponse resp);
 public slots:
     void onNewConnection();
     void onReadyRead();
@@ -21,6 +22,8 @@ public slots:
     void onCommandTransmitted(ServerCommand cmd);
 
 signals:
+    void streamApproved();
+    void streamStopped();
 
 private:
     QTcpServer* server;

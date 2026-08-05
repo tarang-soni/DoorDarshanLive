@@ -12,6 +12,8 @@ public:
 
 signals:
     void transmitCommand(ServerCommand cmd);
+    void streamApproved();
+    void streamStopped();
 public slots:
 
 
