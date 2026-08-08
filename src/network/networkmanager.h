@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "tcpconnector.h"
-#include "Utils.h"
+#include "Protocol.h"
 class NetworkManager : public QObject
 {
     Q_OBJECT

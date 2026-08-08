@@ -60,6 +60,7 @@ void VideoBridge::startListening()
             "mysink"));
 
     if (!m_appSink)
+
     {
         qCritical() << "Couldn't find appsink";
         cleanupPipeline();

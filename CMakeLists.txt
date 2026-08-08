@@ -18,14 +18,13 @@ qt_add_qml_module(appqt_DoorDarshanLive
         Main.qml
         SOURCES main.cpp
         SOURCES
-        SOURCES appcontroller.h appcontroller.cpp
-        SOURCES networkmanager.h networkmanager.cpp
-        SOURCES uimanager.h uimanager.cpp
-        SOURCES tcpconnector.h tcpconnector.cpp
-        SOURCES Utils.h
-        SOURCES videobridge.h videobridge.cpp
-        SOURCES
-        SOURCES cameraimageprovider.h cameraimageprovider.cpp
+        SOURCES src/core/appcontroller.h src/core/appcontroller.cpp
+        SOURCES src/network/networkmanager.h src/network/networkmanager.cpp
+        SOURCES src/ui/uimanager.h src/ui/uimanager.cpp
+        SOURCES src/network/tcpconnector.h src/network/tcpconnector.cpp
+        SOURCES src/network/Protocol.h
+        SOURCES src/video/videobridge.h src/video/videobridge.cpp
+        SOURCES src/video/cameraimageprovider.h src/video/cameraimageprovider.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

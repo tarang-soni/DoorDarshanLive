@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
-#include "Utils.h"
+#include "Protocol.h"
 
 class UIManager : public QObject
 {

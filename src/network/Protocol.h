@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 #include <cstdint>
 
 
@@ -21,4 +21,4 @@ enum class ClientResponse:uint8_t{
     ConnectionEnded   = 0x60
 
 };
-#endif // UTILS_H
+#endif // PROTOCOL_H
