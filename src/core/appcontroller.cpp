@@ -1,4 +1,4 @@
-#include "appcontroller.h"
+#include "core/appcontroller.h"
 
 AppController::AppController(QObject *parent)
     : QObject{parent}

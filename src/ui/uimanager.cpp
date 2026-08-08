@@ -1,4 +1,4 @@
-#include "uimanager.h"
+#include "ui/uimanager.h"
 
 UIManager::UIManager(QObject *parent)
     : QObject{parent}

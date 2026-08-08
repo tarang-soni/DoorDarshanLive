@@ -1,5 +1,5 @@
-#include "cameraimageprovider.h"
-#include "videobridge.h"
+#include "video/cameraimageprovider.h"
+#include "video/videobridge.h"
 
 CameraImageProvider::CameraImageProvider(VideoBridge *bridge)
     : QQuickImageProvider(QQuickImageProvider::Image),

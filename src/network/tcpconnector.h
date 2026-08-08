@@ -5,7 +5,7 @@
 #include <QTcpSocket>
 #include <QTcpServer>
 #include <QAbstractSocket>
-#include "Protocol.h"
+#include "network/Protocol.h"
 class TcpConnector : public QObject
 {
     Q_OBJECT

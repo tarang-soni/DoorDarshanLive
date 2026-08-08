@@ -3,12 +3,11 @@
 
 #include <QObject>
 #include <QQmlEngine>
-#include "Protocol.h"
+#include "network/Protocol.h"
 
 class UIManager : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
 public:
     explicit UIManager(QObject *parent = nullptr);
     Q_INVOKABLE void requestStartStream();

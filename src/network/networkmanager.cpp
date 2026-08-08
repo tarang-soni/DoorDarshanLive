@@ -1,4 +1,4 @@
-#include "networkmanager.h"
+#include "network/networkmanager.h"
 
 NetworkManager::NetworkManager(QObject *parent)
     : QObject{parent}

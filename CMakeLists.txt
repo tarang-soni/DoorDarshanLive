@@ -14,19 +14,31 @@ qt_add_executable(appqt_DoorDarshanLive
 
 qt_add_qml_module(appqt_DoorDarshanLive
     URI qt_DoorDarshanLive
+
     QML_FILES
         Main.qml
-        SOURCES main.cpp
-        SOURCES
-        SOURCES src/core/appcontroller.h src/core/appcontroller.cpp
-        SOURCES src/network/networkmanager.h src/network/networkmanager.cpp
-        SOURCES src/ui/uimanager.h src/ui/uimanager.cpp
-        SOURCES src/network/tcpconnector.h src/network/tcpconnector.cpp
-        SOURCES src/network/Protocol.h
-        SOURCES src/video/videobridge.h src/video/videobridge.cpp
-        SOURCES src/video/cameraimageprovider.h src/video/cameraimageprovider.cpp
-)
 
+    SOURCES
+        src/core/appcontroller.h
+        src/core/appcontroller.cpp
+
+        src/network/networkmanager.h
+        src/network/networkmanager.cpp
+        src/network/tcpconnector.h
+        src/network/tcpconnector.cpp
+        src/network/Protocol.h
+
+        src/ui/uimanager.h
+        src/ui/uimanager.cpp
+
+        src/video/videobridge.h
+        src/video/videobridge.cpp
+        src/video/cameraimageprovider.h
+        src/video/cameraimageprovider.cpp
+)
+target_include_directories(appqt_DoorDarshanLive PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.

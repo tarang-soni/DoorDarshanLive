@@ -2,8 +2,8 @@
 #define NETWORKMANAGER_H
 
 #include <QObject>
-#include "tcpconnector.h"
-#include "Protocol.h"
+#include "network/tcpconnector.h"
+
 class NetworkManager : public QObject
 {
     Q_OBJECT

@@ -1,8 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "appcontroller.h"
-#include "cameraimageprovider.h"
+#include "core/appcontroller.h"
+#include "video/cameraimageprovider.h"
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);

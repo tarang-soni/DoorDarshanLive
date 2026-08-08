@@ -1,4 +1,4 @@
-#include "tcpconnector.h"
+#include "network/tcpconnector.h"
 #include<iostream>
 TcpConnector::TcpConnector(QObject *parent,const QHostAddress &address, quint16 port)
     : QObject{parent},m_activeClient{nullptr}

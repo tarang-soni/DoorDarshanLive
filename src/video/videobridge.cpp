@@ -1,4 +1,4 @@
-#include "videobridge.h"
+#include "video/videobridge.h"
 #include <QDebug>
 #include <QMutexLocker>
 

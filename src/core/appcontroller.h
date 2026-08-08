@@ -2,9 +2,9 @@
 #define APPCONTROLLER_H
 
 #include <QObject>
-#include "networkmanager.h"
-#include "uimanager.h"
-#include "videobridge.h"
+#include "network/networkmanager.h"
+#include "ui/uimanager.h"
+#include "video/videobridge.h"
 class AppController : public QObject
 {
     Q_OBJECT
