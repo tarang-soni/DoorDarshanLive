@@ -1,17 +1,15 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import ".."
 ColumnLayout {
 
     spacing: 8
 
-    Label {
-        text: "[Recent Activity]"
-        color: Theme.normal_text_theme_color
-        font.family: Theme.jetbrainsFont
+    HeadingText {
+        headingTxt: "Recent Activity"
         font.pixelSize: 15
     }
-
     Rectangle{
         id:recentActivity
         Layout.fillWidth: true

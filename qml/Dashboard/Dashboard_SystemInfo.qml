@@ -6,13 +6,10 @@ ColumnLayout {
 
     spacing: 8
 
-    Label {
-        text: "[System Information]"
-        color: Theme.normal_text_theme_color
-        font.family: Theme.jetbrainsFont
+    HeadingText {
+        headingTxt: "System Information"
         font.pixelSize: 15
     }
-
     Rectangle{
 
         Layout.fillWidth: true

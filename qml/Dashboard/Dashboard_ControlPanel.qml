@@ -1,14 +1,13 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import ".."
 ColumnLayout {
 
     spacing: 8
 
-    Label {
-        text: "[Control Panel]"
-        color: Theme.normal_text_theme_color
-        font.family: Theme.jetbrainsFont
+    HeadingText {
+        headingTxt: "Control Panel"
         font.pixelSize: 15
     }
     Rectangle{

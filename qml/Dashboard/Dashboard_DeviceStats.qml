@@ -6,10 +6,8 @@ ColumnLayout {
 
     spacing: 8
 
-    Label {
-        text: "[Device Status]"
-        color: Theme.normal_text_theme_color
-        font.family: Theme.jetbrainsFont
+    HeadingText {
+        headingTxt: "Device Status"
         font.pixelSize: 15
     }
 

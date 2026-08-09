@@ -4,12 +4,13 @@ import QtQuick.Layouts
 import "Dashboard"
 PageFrame{
     id: root
-    headerContent:Label{
-        color:Theme.normal_text_theme_color
+    headerContent:HeadingText{
         font.pixelSize:24
-        font.family: Theme.jetbrainsFont
-        text:"[History]"
+        headingTxt:"History"
         anchors.centerIn: parent
+
+        glyph:"<"
+        mirror:true
     }
     content:
         Item{

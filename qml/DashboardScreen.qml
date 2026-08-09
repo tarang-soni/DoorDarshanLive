@@ -4,12 +4,13 @@ import QtQuick.Layouts
 import "Dashboard"
 PageFrame{
     id: root
-    headerContent:Label{
-        color:Theme.normal_text_theme_color
+    headerContent:HeadingText{
         font.pixelSize:24
-        font.family: Theme.jetbrainsFont
-        text:"[Dashboard]"
+        headingTxt:"Dashboard"
         anchors.centerIn: parent
+
+        glyph:"<"
+        mirror:true
     }
     content:
         Item{
@@ -38,10 +39,8 @@ PageFrame{
                 Layout.fillHeight: true
                 spacing: 8
 
-                Label {
-                    text: "[Live Preview]"
-                    color: Theme.normal_text_theme_color
-                    font.family: Theme.jetbrainsFont
+                HeadingText {
+                    headingTxt: "Live Preview"
                     font.pixelSize: 15
                 }
 

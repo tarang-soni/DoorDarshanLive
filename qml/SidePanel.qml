@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import QtQuick.Controls
 Rectangle{
     id:root
-
     width:parent.width*.2
     anchors {
         left: parent.left
@@ -27,11 +26,11 @@ Rectangle{
         Label  {
             anchors.fill: parent
 
-            text: "[Door-Darshan]"
+            text: "-[Door-Darshan]-"
             color: Theme.normal_text_theme_color
 
             font.family: Theme.jetbrainsFont
-            font.pixelSize: 24
+            font.pixelSize: 22
 
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
@@ -48,13 +47,18 @@ Rectangle{
 
         ListView{
             id:listView
-            anchors.fill:parent
+            width: parent.width * 0.85
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top
+                bottom: parent.bottom
+            }
             clip:true
 
             model: [
                 { text: "Dashboard", page: "qml/DashboardScreen.qml" },
                 { text: "History", page: "qml/HistoryScreen.qml" },
-                { text: "Device Setup", page: "qml/DeviceSetupScreen.qml" },
+                { text: "Setup", page: "qml/DeviceSetupScreen.qml" },
                 { text: "Settings", page: "qml/SettingsScreen.qml" }
             ]
             spacing:5
@@ -69,20 +73,18 @@ Rectangle{
                 SidebarButton
                 {
                     id:sideBtn
-
-                    width: listView.width
+                    width:listView.width
                     height: 60
                     color:"transparent"
                     text: delegateRoot.modelData.text
                     isSelected:delegateRoot.ListView.isCurrentItem
-
+                    fontSize:16
                     anchors.bottom: parent.isLastItem ? parent.bottom : undefined
                     anchors.top: parent.isLastItem ? undefined : parent.top
                     onClicked:{
                         listView.currentIndex=delegateRoot.index
                         screenSelected(delegateRoot.modelData.page)
                     }
-
                 }
             }
 
