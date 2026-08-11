@@ -19,36 +19,20 @@ PageFrame{
             anchors.fill: parent
             anchors.margins: 40
             spacing:20
-            Row{
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredHeight: 60
-
+            RowLayout {
+                Layout.fillWidth: true
                 spacing: 10
-                SidebarButton {
-                    text: "General"
-                    width: 150
-                    fontSize:16
-                }
 
-                SidebarButton {
-                    text: "Camera"
-                    width: 150
-                    fontSize:16
-                }
-                SidebarButton {
-                    text: "Network"
-                    width: 150
-                    fontSize:16
-                }
-                SidebarButton {
-                    text: "Alerts"
-                    width: 150
-                    fontSize:16
-                }
-                SidebarButton {
-                    text: "About"
-                    width: 150
-                    fontSize:16
+                Repeater {
+                    model: ["General", "Camera", "Network", "Alerts", "About"]
+
+                    SidebarButton {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 60
+
+                        text: modelData
+                        fontSize: 16
+                    }
                 }
             }
 
