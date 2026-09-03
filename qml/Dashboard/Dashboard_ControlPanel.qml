@@ -5,6 +5,8 @@ import ".."
 ColumnLayout {
 
     spacing: 8
+    property bool isStreamOn:false
+    property bool isMotionOn:false
 
     HeadingText {
         headingTxt: "Control Panel"
@@ -32,16 +34,39 @@ ColumnLayout {
             SidebarButton{
                 Layout.fillWidth: true
                 Layout.preferredHeight:40
-                text:"Camera : ON"
+                text:isStreamOn?"Camera : ON":"Camera : OFF"
                 fontSize:15
                 color:"transparent"
+                onClicked:
+                {
+                    if(isStreamOn)
+                    {
+                        isStreamOn=false;
+                        uiManager.requestStopStream()
+                    }else{
+                        isStreamOn = true;
+                        uiManager.requestStartStream()
+                    }
+
+
+                }
             }
             SidebarButton{
                 Layout.fillWidth: true
                 Layout.preferredHeight:40
-                text:"Motion : ON"
+                text:isMotionOn?"Motion : ON":"Motion : OFF"
                 fontSize:15
                 color:"transparent"
+                onClicked:{
+                    if(isMotionOn)
+                    {
+                        isMotionOn=false;
+
+                    }else{
+                        isMotionOn = true;
+
+                    }
+                }
 
             }
             SidebarButton{

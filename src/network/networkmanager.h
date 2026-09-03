@@ -14,7 +14,11 @@ signals:
     void transmitCommand(ServerCommand cmd);
     void streamApproved();
     void streamStopped();
+
+    void piConnectedChanged(bool enabled);
 public slots:
+    void startStream();
+    void stopStream();
 
 
 private:

@@ -39,6 +39,7 @@ RowLayout {
     }
 
     Label {
+        id:valLabel
         text: root.value
         Layout.fillWidth: true
 

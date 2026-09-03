@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
         "videoBridge",
         m_appController.videoBridge());
 
+    engine.rootContext()->setContextProperty("app",&m_appController);
+
     engine.addImageProvider(
         "camera",
         new CameraImageProvider(

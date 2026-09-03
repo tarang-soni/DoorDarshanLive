@@ -58,6 +58,7 @@ qt_add_qml_module(appqt_DoorDarshanLive
         QML_FILES qml/DeviceSetupScreen.qml
         QML_FILES qml/SettingsScreen.qml
         QML_FILES qml/HeadingText.qml
+        QML_FILES qml/BoolStatusRow.qml
 )
 target_include_directories(appqt_DoorDarshanLive PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src

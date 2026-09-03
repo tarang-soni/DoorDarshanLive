@@ -23,6 +23,7 @@ public slots:
 
 signals:
     void frameReady();
+    void streamStopped();
 
 private:
     void cleanupPipeline();

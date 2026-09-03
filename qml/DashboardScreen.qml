@@ -52,7 +52,27 @@ PageFrame{
                     border.width: 1
                     border.color: Theme.border_theme_color
 
-                    // Camera Image
+                    //Camera Image
+                    Image {
+                        id: liveFeed
+                        //anchors.centerIn: parent
+                        anchors.fill: parent
+                        fillMode: Image.PreserveAspectFit
+                        cache: false
+                        source: "image://camera/live"
+                    }
+
+                    Connections {
+                        target: videoBridge
+
+                        function onFrameReady() {
+                            liveFeed.source = ""
+                            liveFeed.source = "image://camera/live?" + Date.now()
+                        }
+                        function onStreamStopped() {
+                                liveFeed.source = ""
+                            }
+                    }
                 }
             }
 

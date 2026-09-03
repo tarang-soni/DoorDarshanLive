@@ -24,34 +24,44 @@ ColumnLayout {
             anchors.margins: 20
             spacing: 14
 
-            StatusRow {
+            BoolStatusRow {
                 label: "Pi"
-                value: "Connected"
-                valueColor: "#6FCF97"
+                isOn:uiManager.piConnected
             }
 
-            StatusRow {
+            BoolStatusRow {
                 label: "Camera"
-                value: "Connected"
-                valueColor: "#6FCF97"
+                isOn:false
             }
 
-            StatusRow {
+            BoolStatusRow {
+                id:streamStatus
                 label: "Stream"
-                value: "Idle"
-                valueColor: "#F2C94C"
+                falseValue: "Idle"
+                falseColor: Theme.status_yellow
+                isOn:false
             }
 
-            StatusRow {
+            BoolStatusRow {
                 label: "Motion"
-                value: "Enabled"
-                valueColor: "#6FCF97"
+                trueValue: "Enabled"
+                falseValue:"Disabled"
+                isOn:false
             }
 
             Item {
                 Layout.fillHeight: true
             }
         }
+    }
+    Connections {
+        target: videoBridge
+        function onFrameReady() {
+            streamStatus.isOn=true
+        }
+        function onStreamStopped() {
+                streamStatus.isOn=false
+            }
     }
 }
 

@@ -18,7 +18,8 @@ PageFrame{
         ColumnLayout{
             anchors.fill: parent
             anchors.margins: 40
-            spacing:20
+            anchors.topMargin:20
+            spacing:10
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
@@ -43,6 +44,44 @@ PageFrame{
                 color: Theme.primary_theme_color
                 border.width: 1
                 border.color: Theme.border_theme_color
+                ScrollView{
+                    anchors.fill: parent
+                    ColumnLayout{
+                        anchors.fill: parent
+                        Repeater{
+                            model:5
+                            Rectangle{
+                                anchors{
+                                    left:parent.left
+                                    right:parent.right
+                                    topMargin:1
+                                    leftMargin:1
+                                    rightMargin: 1
+                                }
+                                RowLayout{
+                                    anchors.fill:parent
+                                    spacing:20
+                                    Label{
+                                        Layout.leftMargin: 20
+                                        Layout.fillWidth: true
+                                        text:"Use xyz:"
+                                        font.family: Theme.jetbrainsFont
+                                        font.pixelSize: 15
+                                        color:"white"
+                                    }
+                                    CheckBox
+                                    {
+                                        Layout.fillWidth: true
+                                        checked:true
+                                    }
+                                }
+
+                                height: 40
+                                color:"black"
+                            }
+                        }
+                    }
+                }
             }
         }
     }
