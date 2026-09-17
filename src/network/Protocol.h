@@ -1,7 +1,7 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 #include <cstdint>
-
+#include<QtTypes>
 
 enum class ServerCommand:uint8_t{
     StartStream = 0x00,

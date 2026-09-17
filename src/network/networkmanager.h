@@ -2,8 +2,8 @@
 #define NETWORKMANAGER_H
 
 #include <QObject>
-#include "network/tcpconnector.h"
-
+#include "tcpconnector.h"
+#include "discoveryservice.h"
 class NetworkManager : public QObject
 {
     Q_OBJECT
@@ -23,6 +23,7 @@ public slots:
 
 private:
     TcpConnector* m_tcpConnector;
+    DiscoveryService* m_discoveryService;
 };
 
 #endif // NETWORKMANAGER_H

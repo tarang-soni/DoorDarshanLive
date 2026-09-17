@@ -29,10 +29,10 @@ ColumnLayout {
                 isOn:uiManager.piConnected
             }
 
-            BoolStatusRow {
-                label: "Camera"
-                isOn:false
-            }
+            // BoolStatusRow {
+            //     label: "Camera"
+            //     isOn:false
+            // }
 
             BoolStatusRow {
                 id:streamStatus
