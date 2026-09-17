@@ -25,6 +25,8 @@ signals:
     void streamApproved();
     void streamStopped();
 
+    void connectedChanged(bool connected);//signal to check if pi connected or disconnected
+
 private:
     QTcpServer* server;
     QTcpSocket* m_activeClient;

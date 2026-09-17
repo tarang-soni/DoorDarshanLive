@@ -11,7 +11,9 @@ qt_standard_project_setup(REQUIRES 6.11)
 qt_add_executable(appqt_DoorDarshanLive
     main.cpp
 )
-
+set_source_files_properties(qml/Theme.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
 qt_add_qml_module(appqt_DoorDarshanLive
     URI qt_DoorDarshanLive
 
@@ -35,10 +37,36 @@ qt_add_qml_module(appqt_DoorDarshanLive
         src/video/videobridge.cpp
         src/video/cameraimageprovider.h
         src/video/cameraimageprovider.cpp
+
+    RESOURCES
+        resources/fonts/JetBrainsMono-VariableFont_wght.ttf
+        resources/fonts/Saira-VariableFont_wdth,wght.ttf
+
+    QML_FILES
+        qml/CustomBorder.qml
+        qml/DashboardScreen.qml
+        qml/PageFrame.qml
+        qml/SidePanel.qml
+        qml/SidebarButton.qml
+        qml/Theme.qml
+        qml/StatusRow.qml
+        qml/Dashboard/Dashboard_ControlPanel.qml
+        qml/Dashboard/Dashboard_DeviceStats.qml
+        qml/Dashboard/Dashboard_SystemInfo.qml
+        qml/Dashboard/Dashboard_RecentActivity.qml
+        QML_FILES qml/HistoryScreen.qml
+        QML_FILES qml/DeviceSetupScreen.qml
+        QML_FILES qml/SettingsScreen.qml
+        QML_FILES qml/HeadingText.qml
+        QML_FILES qml/BoolStatusRow.qml
+        QML_FILES
+        SOURCES src/network/discoveryservice.h src/network/discoveryservice.cpp
+        SOURCES src/core/utils.h
 )
 target_include_directories(appqt_DoorDarshanLive PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.

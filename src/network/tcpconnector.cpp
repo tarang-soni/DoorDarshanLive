@@ -63,14 +63,14 @@ void TcpConnector::onNewConnection()
     m_activeClient->setSocketOption(QAbstractSocket::LowDelayOption, 1);
     connect(m_activeClient,&QTcpSocket::readyRead,this,&TcpConnector::onReadyRead);
     connect(m_activeClient ,&QTcpSocket::disconnected,this,&TcpConnector::onSocketDisconnected);
-
+    emit connectedChanged(true);
 }
 
 void TcpConnector::onReadyRead()
 {
-    QTcpSocket* s = qobject_cast<QTcpSocket*>(sender());
-    if(!s)return;
-    QByteArray data = s->readAll();
+    if (!m_activeClient)
+        return;
+    QByteArray data = m_activeClient->readAll();
     if (data.isEmpty()) return;
     uint8_t value = static_cast<uint8_t>(data.at(0));
     ClientResponse resp = static_cast<ClientResponse>(value);
@@ -80,11 +80,13 @@ void TcpConnector::onReadyRead()
 
 void TcpConnector::onSocketDisconnected()
 {
-    QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
-    if (!clientSocket) return;
+    if (!m_activeClient)
+        return;
 
     std::cout << "Client disconnected." << std::endl;
-    clientSocket->deleteLater();
+    m_activeClient->deleteLater();
+    m_activeClient = nullptr;
+    emit connectedChanged(false);
 }
 
 void TcpConnector::onCommandTransmitted(ServerCommand cmd)

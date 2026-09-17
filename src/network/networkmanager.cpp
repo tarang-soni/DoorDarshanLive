@@ -7,4 +7,14 @@ NetworkManager::NetworkManager(QObject *parent)
     connect(this,&NetworkManager::transmitCommand,m_tcpConnector,&TcpConnector::onCommandTransmitted);
     connect(m_tcpConnector,&TcpConnector::streamApproved,this,&NetworkManager::streamApproved);
     connect(m_tcpConnector,&TcpConnector::streamStopped,this,&NetworkManager::streamStopped);
+    connect(m_tcpConnector,&TcpConnector::connectedChanged,this,&NetworkManager::piConnectedChanged);
+}
+void NetworkManager::startStream()
+{
+    emit transmitCommand(ServerCommand::StartStream);
+}
+
+void NetworkManager::stopStream()
+{
+    emit transmitCommand(ServerCommand::StopStream);
 }

@@ -1,96 +1,49 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
+
+import "qml"
+import "qml/Dashboard"
 
 Window {
-    width: 640
-    height: 480
+    id: root
+
+    width: 1280
+    height: 720
     visible: true
     title: qsTr("Hello World")
 
-    Image {
-        id: liveFeed
+    Component.onCompleted: {
+        console.log("Main completed", this)
+    }
+
+    Item {
         anchors.fill: parent
-        fillMode: Image.PreserveAspectFit
-        cache: false
-        source: "image://camera/live"
-    }
 
-    Connections {
-        target: videoBridge
-
-        function onFrameReady() {
-            liveFeed.source = ""
-            liveFeed.source = "image://camera/live?" + Date.now()
-        }
-    }
-
-    Row {
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            bottom: parent.bottom
-            bottomMargin: 20
+        SidePanel {
+            id: sidebar
+            onScreenSelected:
+                (pageUrl)=>{
+                    stackView.replace(Qt.resolvedUrl(pageUrl));
+                }
         }
 
-        spacing: 10
+        StackView {
+            id: stackView
 
-        Button {
-            width: 100
-            height: 100
-            text: "Start Stream"
-
-            background: Rectangle {
-                color: "black"
+            anchors {
+                top: parent.top
+                left: sidebar.right
+                right: parent.right
+                bottom: parent.bottom
             }
-
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 16
-            }
-
-            onClicked: uiManager.requestStartStream()
-        }
-
-        Button {
-            width: 100
-            height: 100
-            text: "Stop Stream"
-
-            background: Rectangle {
-                color: "black"
-            }
-
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 16
-            }
-
-            onClicked: uiManager.requestStopStream()
-        }
-
-        Button {
-            width: 100
-            height: 100
-            text: "Quit"
-
-            background: Rectangle {
-                color: "black"
-            }
-
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 16
-            }
-
-            onClicked: uiManager.requestQuit()
+            pushEnter: null
+            pushExit: null
+            popEnter: null
+            popExit: null
+            replaceEnter: null
+            replaceExit: null
+            initialItem: DashboardScreen {}
         }
     }
 }

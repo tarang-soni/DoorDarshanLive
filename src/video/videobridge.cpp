@@ -28,11 +28,10 @@ void VideoBridge::startListening()
     QString pipeline =
         "udpsrc port=5000 "
         "caps=\"application/x-rtp,media=video,clock-rate=90000,"
-        "encoding-name=H264,payload=96\" ! "
-        "rtpjitterbuffer latency=200 ! "
-        "rtph264depay ! "
-        "h264parse ! "
-        "avdec_h264 ! "
+        "encoding-name=JPEG,payload=26\" ! "
+        "rtpjitterbuffer latency=100 ! "
+        "rtpjpegdepay ! "
+        "jpegdec ! "
         "videoconvert ! "
         "video/x-raw,format=RGBA ! "
         "appsink name=mysink "
@@ -90,6 +89,7 @@ void VideoBridge::stopListening()
         GST_STATE_NULL);
 
     cleanupPipeline();
+    emit streamStopped();
 }
 
 void VideoBridge::cleanupPipeline()

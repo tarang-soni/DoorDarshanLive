@@ -7,7 +7,10 @@ AppController::AppController(QObject *parent)
     m_uiManager = new UIManager(this);
     m_videoBridge = new VideoBridge(this);
 
-    connect(m_uiManager,&UIManager::transmitCommand,m_networkManager,&NetworkManager::transmitCommand);
+    connect(m_networkManager,&NetworkManager::piConnectedChanged,m_uiManager,&UIManager::setPiConnected);
+    connect(m_uiManager,&UIManager::startStreamRequested,m_networkManager,&NetworkManager::startStream);
+    connect(m_uiManager,&UIManager::stopStreamRequested,m_networkManager,&NetworkManager::stopStream);
+    connect(m_networkManager,&NetworkManager::streamApproved,m_uiManager,&UIManager::isStreamingChanged);
     connect(m_networkManager,&NetworkManager::streamApproved,m_videoBridge,&VideoBridge::startListening,Qt::QueuedConnection);
     connect(m_networkManager,&NetworkManager::streamStopped,m_videoBridge,&VideoBridge::stopListening,Qt::QueuedConnection);
 }

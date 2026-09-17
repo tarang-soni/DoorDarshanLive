@@ -1,0 +1,91 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ".."
+ColumnLayout {
+
+    spacing: 8
+    property bool isStreamOn:false
+    property bool isMotionOn:false
+
+    HeadingText {
+        headingTxt: "Control Panel"
+        font.pixelSize: 15
+    }
+    Rectangle{
+        Layout.preferredWidth: 180
+        Layout.fillHeight: true
+        color: Theme.primary_theme_color
+        border.width: 1
+        border.color: Theme.border_theme_color
+
+        ColumnLayout
+        {
+            anchors.fill: parent
+            anchors.margins: 20
+            spacing:10
+            SidebarButton{
+                Layout.fillWidth: true
+                Layout.preferredHeight:40
+                text:"Refresh"
+                fontSize:15
+                color:"transparent"
+            }
+            SidebarButton{
+                Layout.fillWidth: true
+                Layout.preferredHeight:40
+                text:isStreamOn?"Camera : ON":"Camera : OFF"
+                fontSize:15
+                color:"transparent"
+                onClicked:
+                {
+                    if(isStreamOn)
+                    {
+                        isStreamOn=false;
+                        uiManager.requestStopStream()
+                    }else{
+                        isStreamOn = true;
+                        uiManager.requestStartStream()
+                    }
+
+
+                }
+            }
+            SidebarButton{
+                Layout.fillWidth: true
+                Layout.preferredHeight:40
+                text:isMotionOn?"Motion : ON":"Motion : OFF"
+                fontSize:15
+                color:"transparent"
+                onClicked:{
+                    if(isMotionOn)
+                    {
+                        isMotionOn=false;
+
+                    }else{
+                        isMotionOn = true;
+
+                    }
+                }
+
+            }
+            SidebarButton{
+                Layout.fillWidth: true
+                Layout.preferredHeight:40
+                text:"Snapshot"
+                fontSize:15
+                color:"transparent"
+
+            }
+            SidebarButton{
+                Layout.fillWidth: true
+                Layout.preferredHeight:40
+                text:"Reconnect"
+                fontSize:15
+                color:"transparent"
+
+            }
+
+        }
+    }
+}
