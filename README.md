@@ -22,11 +22,8 @@ A smart doorbell ecosystem with a Qt/QML desktop client and Raspberry Pi backend
 
 | Dashboard | Device Setup |
 |:---------:|:------------:|
-| ![Dashboard](docs/images/dashboard.png) | ![Device Setup](docs/images/device-setup.png) |
+| ![Dashboard](resources/images/dashboard.png) | ![Device Setup](resources/images/setup.png) |
 
-| History | Settings |
-|:-------:|:--------:|
-| ![History](docs/images/history.png) | ![Settings](docs/images/settings.png) |
 
 ## Architecture
 
