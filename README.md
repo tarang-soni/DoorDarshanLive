@@ -27,8 +27,6 @@ A smart doorbell ecosystem with a Qt/QML desktop client and Raspberry Pi backend
 
 ## Architecture
 
-![Architecture](docs/images/architecture.png)
-
 The application follows an event-driven, layered architecture. Components are wired together in `AppController` via Qt signals/slots, and exposed to QML as context properties.
 
 | Component | Layer | Responsibility |
