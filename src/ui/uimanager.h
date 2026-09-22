@@ -12,6 +12,7 @@
         Q_INVOKABLE void requestStartStream();
         Q_INVOKABLE void requestStopStream();
         Q_INVOKABLE void requestQuit();
+        Q_INVOKABLE void findDevices();
 
         Q_PROPERTY(bool piConnected READ piConnected WRITE setPiConnected NOTIFY piConnectedChanged FINAL)
         Q_PROPERTY(bool isStreaming READ isStreaming WRITE setIsStreaming NOTIFY isStreamingChanged FINAL)
@@ -28,8 +29,10 @@
         void startStreamRequested();
         void stopStreamRequested();
         void piConnectedChanged();
-
         void isStreamingChanged();
+
+        void findDevicesRequested();
+
 
     private:
 

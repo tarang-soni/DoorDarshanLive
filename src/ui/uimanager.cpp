@@ -19,6 +19,11 @@ void UIManager::requestQuit()
     qDebug()<<"Quit not implemented";
 }
 
+void UIManager::findDevices()
+{
+    emit findDevicesRequested();
+}
+
 
 
 bool UIManager::piConnected() const

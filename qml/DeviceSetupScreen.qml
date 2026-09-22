@@ -29,6 +29,9 @@ PageFrame{
 
                     text: "Find Pi"
                     fontSize: 16
+                    onClicked: {
+                        app.uiManager.findDevices();
+                    }
                 }
             }
 
@@ -85,6 +88,7 @@ PageFrame{
                                     text: "Connect"
                                     fontSize: 16
                                     color:"transparent"
+
                                 }
 
 

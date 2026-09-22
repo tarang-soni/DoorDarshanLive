@@ -19,6 +19,7 @@ signals:
 public slots:
     void startStream();
     void stopStream();
+    void discoverDevices();
 
 
 private:

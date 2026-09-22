@@ -4,10 +4,12 @@ NetworkManager::NetworkManager(QObject *parent)
     : QObject{parent}
 {
     m_tcpConnector = new TcpConnector(this,QHostAddress::Any,1234);//move the hardcoded values to a data header file so its easy to change. can be static class as well or global header
+    m_discoveryService = new DiscoveryService(this);
     connect(this,&NetworkManager::transmitCommand,m_tcpConnector,&TcpConnector::onCommandTransmitted);
     connect(m_tcpConnector,&TcpConnector::streamApproved,this,&NetworkManager::streamApproved);
     connect(m_tcpConnector,&TcpConnector::streamStopped,this,&NetworkManager::streamStopped);
     connect(m_tcpConnector,&TcpConnector::connectedChanged,this,&NetworkManager::piConnectedChanged);
+
 }
 void NetworkManager::startStream()
 {
@@ -17,4 +19,9 @@ void NetworkManager::startStream()
 void NetworkManager::stopStream()
 {
     emit transmitCommand(ServerCommand::StopStream);
+}
+
+void NetworkManager::discoverDevices()
+{
+    m_discoveryService->discover();
 }

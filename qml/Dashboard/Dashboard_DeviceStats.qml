@@ -26,7 +26,7 @@ ColumnLayout {
 
             BoolStatusRow {
                 label: "Pi"
-                isOn:uiManager.piConnected
+                isOn: app ? app.uiManager.piConnected: false
             }
 
             // BoolStatusRow {
@@ -55,7 +55,7 @@ ColumnLayout {
         }
     }
     Connections {
-        target: videoBridge
+        target:  app ? app.videoBridge : null
         function onFrameReady() {
             streamStatus.isOn=true
         }
@@ -63,5 +63,6 @@ ColumnLayout {
                 streamStatus.isOn=false
             }
     }
+
 }
 

@@ -11,12 +11,11 @@ class AppController : public QObject
 public:
     explicit AppController(QObject *parent = nullptr);
 
+    Q_PROPERTY(UIManager* uiManager READ uiManager CONSTANT)
+    UIManager* uiManager() const { return m_uiManager; }
+    Q_PROPERTY(VideoBridge* videoBridge READ videoBridge CONSTANT)
+    VideoBridge* videoBridge() const { return m_videoBridge; }
     inline UIManager& getUiManager(){return *m_uiManager;}
-    VideoBridge* videoBridge() const
-    {
-        return m_videoBridge;
-    }
-signals:
 
 private:
     NetworkManager* m_networkManager;

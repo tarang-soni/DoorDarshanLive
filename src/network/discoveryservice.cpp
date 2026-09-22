@@ -5,6 +5,7 @@
 DiscoveryService::DiscoveryService(QObject* parent):m_socket(nullptr)
 {
     connect(&m_timer,&QTimer::timeout,this,&DiscoveryService::broadcastDiscovery);
+    start();
 }
 
 void DiscoveryService::start()
@@ -25,15 +26,26 @@ void DiscoveryService::start()
 
 }
 
-void DiscoveryService::stop()
+// void DiscoveryService::stop()
+// {
+//     if(!m_socket) return;
+//     m_timer.stop();
+//     m_socket->close();
+//     m_socket->deleteLater();
+//     m_socket = nullptr;
+// }
+void DiscoveryService::discover()
 {
-    if(!m_socket) return;
-    m_timer.stop();
-    m_socket->close();
-    m_socket->deleteLater();
-    m_socket = nullptr;
-}
+    if (!m_socket)
+        return;
 
+    m_timer.stop();
+    m_broadcastCount = 0;
+    broadcastDiscovery();
+    m_timer.start(300);
+
+
+}
 void DiscoveryService::broadcastDiscovery()
 {
     if (m_broadcastCount >= 3)
@@ -52,31 +64,20 @@ void DiscoveryService::broadcastDiscovery()
     {
         qWarning() << "Broadcast failed:" << m_socket->errorString();
     }
+    qDebug()<<"Packet Sent:"<<packet;
     ++m_broadcastCount;
 }
 
-void DiscoveryService::discover()
-{
-    if (!m_socket)
-        return;
 
-    m_timer.stop();
-    m_broadcastCount = 0;
-    broadcastDiscovery();
-    m_timer.start(300);
-
-
-}
 
 void DiscoveryService::processPendingDatagrams()
 {
     while(m_socket->hasPendingDatagrams())
     {
         QNetworkDatagram datagram = m_socket->receiveDatagram();
-        qDebug() << "Received from:"
-                 << datagram.senderAddress().toString()
-                 << ":" << datagram.senderPort();
+        QString data = QString::fromUtf8(datagram.data());
+        if(!data.startsWith("DD_REPLY"))
+            continue;
 
-        qDebug() << "Data:" << datagram.data();
     }
 }

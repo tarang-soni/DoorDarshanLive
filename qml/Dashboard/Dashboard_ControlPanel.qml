@@ -42,10 +42,10 @@ ColumnLayout {
                     if(isStreamOn)
                     {
                         isStreamOn=false;
-                        uiManager.requestStopStream()
+                        app.uiManager.requestStopStream()
                     }else{
                         isStreamOn = true;
-                        uiManager.requestStartStream()
+                        app.uiManager.requestStartStream()
                     }
 
 

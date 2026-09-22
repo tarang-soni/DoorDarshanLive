@@ -11,7 +11,7 @@ public:
     explicit DiscoveryService(QObject* parent = nullptr);
 
     void start();
-    void stop();
+    //void stop();
     void discover();
 public slots:
     void processPendingDatagrams();
