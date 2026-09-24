@@ -12,6 +12,19 @@ PageFrame{
         glyph:"<"
         mirror:true
     }
+    ListModel{
+        id: discoveredDevicesModel
+    }
+
+    Connections{
+        target: app.uiManager
+        function onDeviceFound(ip)
+        {
+            console.log("Adding IP to UI: " + ip)
+            discoveredDevicesModel.append({"ipAddress":ip})
+        }
+    }
+
     content:
         Item{
         anchors.fill: parent
@@ -30,6 +43,7 @@ PageFrame{
                     text: "Find Pi"
                     fontSize: 16
                     onClicked: {
+                        discoveredDevicesModel.clear();
                         app.uiManager.findDevices();
                     }
                 }
@@ -45,11 +59,13 @@ PageFrame{
                 ScrollView{
                     anchors.fill: parent
                     anchors.margins: 1
-                    ColumnLayout{
+                    ListView{
+                        id:deviceListView
                         width:parent.width
                         spacing:1
-                        Rectangle{
-                            Layout.fillWidth: true
+                        model:discoveredDevicesModel
+                        delegate: Rectangle{
+                            width: ListView.view.width
                             Layout.preferredHeight: 80
                             color:"black"
                             RowLayout{
@@ -68,26 +84,26 @@ PageFrame{
                                     Label{
                                         Layout.leftMargin: 20
                                         Layout.fillWidth: true
-                                        text:"IP: 192.168.1.1"
+                                        text:"IP:" +model.ipAddress
                                         font.family: Theme.jetbrainsFont
                                         font.pixelSize: 15
                                         color:"white"
                                     }
-                                    Label{
-                                        Layout.leftMargin: 20
-                                        Layout.fillWidth: true
-                                        text:"Serial-ID: ABCD-EFG"
-                                        font.family: Theme.jetbrainsFont
-                                        font.pixelSize: 15
-                                        color:"white"
-                                    }
+
                                 }
+                                Item{
+                                    Layout.fillWidth: true
+                                }
+
                                 SidebarButton {
                                     Layout.preferredHeight: 60
-
+                                    Layout.rightMargin: 20
                                     text: "Connect"
                                     fontSize: 16
                                     color:"transparent"
+                                    onClicked: {
+                                        app.uiManager.connectToPi(model.ipAddress);
+                                    }
 
                                 }
 
@@ -96,6 +112,7 @@ PageFrame{
 
 
                         }
+
                     }
                 }
             }

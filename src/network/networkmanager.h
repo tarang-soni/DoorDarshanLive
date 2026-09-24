@@ -16,11 +16,15 @@ signals:
     void streamStopped();
 
     void piConnectedChanged(bool enabled);
+    void deviceDiscoveryStopped();
+    void discoveryDeviceFound(const QString& ip);
+
+
 public slots:
     void startStream();
     void stopStream();
     void discoverDevices();
-
+    void connectToPi(const QString& ip);
 
 private:
     TcpConnector* m_tcpConnector;

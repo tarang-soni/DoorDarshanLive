@@ -11,9 +11,13 @@ AppController::AppController(QObject *parent)
     connect(m_uiManager,&UIManager::startStreamRequested,m_networkManager,&NetworkManager::startStream);
     connect(m_uiManager,&UIManager::stopStreamRequested,m_networkManager,&NetworkManager::stopStream);
     connect(m_uiManager,&UIManager::findDevicesRequested,m_networkManager,&NetworkManager::discoverDevices);
+    connect(m_uiManager,&UIManager::piConnectionRequested,m_networkManager,&NetworkManager::connectToPi);
+
     connect(m_networkManager,&NetworkManager::streamApproved,m_uiManager,&UIManager::isStreamingChanged);
     connect(m_networkManager,&NetworkManager::streamApproved,m_videoBridge,&VideoBridge::startListening,Qt::QueuedConnection);
     connect(m_networkManager,&NetworkManager::streamStopped,m_videoBridge,&VideoBridge::stopListening,Qt::QueuedConnection);
+    connect(m_networkManager,&NetworkManager::discoveryDeviceFound,m_uiManager,&UIManager::deviceFound);
+    connect(m_networkManager,&NetworkManager::deviceDiscoveryStopped,m_uiManager,&UIManager::deviceDiscoveryStopped);
 
 }
 

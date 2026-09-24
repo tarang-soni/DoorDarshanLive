@@ -24,6 +24,11 @@ void UIManager::findDevices()
     emit findDevicesRequested();
 }
 
+void UIManager::connectToPi(const QString &ip)
+{
+    emit piConnectionRequested(ip);
+}
+
 
 
 bool UIManager::piConnected() const

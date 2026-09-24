@@ -118,6 +118,7 @@ GstFlowReturn VideoBridge::onNewSample(
 
 GstFlowReturn VideoBridge::processFrame(GstAppSink *sink)
 {
+    qDebug() << "New frame received";
     GstSample *sample = gst_app_sink_pull_sample(sink);
 
     if (!sample)

@@ -4,6 +4,7 @@
 #include <QObject>
 #include<QUdpSocket>
 #include <QTimer>
+#include <QSet>
 class DiscoveryService:public QObject
 {
     Q_OBJECT
@@ -13,8 +14,12 @@ public:
     void start();
     //void stop();
     void discover();
+
+    void sendCommandToDevice(const QByteArray &command,const QHostAddress& ip);
 public slots:
     void processPendingDatagrams();
+signals:
+    void deviceFound(const QString& ip);
 private:
     void broadcastDiscovery();
 
@@ -26,6 +31,7 @@ private:
     QTimer m_timer;
 
     int m_broadcastCount = 0;
+    QSet<QString> m_discoveredDevices;
 };
 
 #endif // DISCOVERYSERVICE_H

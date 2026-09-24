@@ -39,7 +39,7 @@ ColumnLayout {
                 label: "Stream"
                 falseValue: "Idle"
                 falseColor: Theme.status_yellow
-                isOn:false
+                isOn: app ? app.uiManager.isStreaming: false
             }
 
             BoolStatusRow {

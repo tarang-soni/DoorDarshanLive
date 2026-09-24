@@ -11,7 +11,8 @@ TcpConnector::TcpConnector(QObject *parent,const QHostAddress &address, quint16 
         std::cerr<<"Server couldnt start"<<std::endl;
     }
     else{
-        std::cout<<"Server started, Listening on port 1234..."<<std::endl;
+        std::cout << "TCP Server started, Listening on dynamic port "
+                  << server->serverPort() << "..." << std::endl;
     }
 }
 
