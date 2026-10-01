@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 project(qt_DoorDarshanLive VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(OpenCV_DIR "D:/Dev/Environments/MSYS2/mingw64/lib/cmake/opencv4")
+find_package(OpenCV REQUIRED)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Network)
+find_package(Qt6 REQUIRED COMPONENTS Quick Network Sql)
 
 qt_standard_project_setup(REQUIRES 6.11)
 
@@ -14,6 +16,7 @@ qt_add_executable(appqt_DoorDarshanLive
 set_source_files_properties(qml/Theme.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
+
 qt_add_qml_module(appqt_DoorDarshanLive
     URI qt_DoorDarshanLive
 
@@ -62,9 +65,15 @@ qt_add_qml_module(appqt_DoorDarshanLive
         QML_FILES
         SOURCES src/network/discoveryservice.h src/network/discoveryservice.cpp
         SOURCES src/core/utils.h
+        SOURCES
+        SOURCES src/video/faceai.h
+        QML_FILES qml/SavedVisitors.qml
+        SOURCES src/core/databasemanager.h src/core/databasemanager.cpp
+        SOURCES src/video/snapshotmanager.h src/video/snapshotmanager.cpp
 )
 target_include_directories(appqt_DoorDarshanLive PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -81,6 +90,8 @@ set_target_properties(appqt_DoorDarshanLive PROPERTIES
 target_link_libraries(appqt_DoorDarshanLive PRIVATE
     Qt6::Quick
     Qt6::Network
+    Qt6::Sql
+    ${OpenCV_LIBS}
 )
 install(TARGETS appqt_DoorDarshanLive
     BUNDLE DESTINATION .
@@ -111,3 +122,8 @@ target_link_directories(appqt_DoorDarshanLive PRIVATE
 target_link_libraries(appqt_DoorDarshanLive PRIVATE
         ${GST_LIBRARIES}
 )
+
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/models/face_detection_yunet_2023mar.onnx"
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/models/face_recognition_sface_2021dec.onnx"
+      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

@@ -26,6 +26,7 @@ void UIManager::findDevices()
 
 void UIManager::connectToPi(const QString &ip)
 {
+    setConnectedIp(ip);
     emit piConnectionRequested(ip);
 }
 
@@ -55,4 +56,30 @@ void UIManager::setIsStreaming(bool newIsStreaming)
         return;
     m_isStreaming = newIsStreaming;
     emit isStreamingChanged();
+}
+
+QString UIManager::connectedIp() const
+{
+    return m_connectedIp;
+}
+
+void UIManager::setConnectedIp(const QString &newConnectedIp)
+{
+    if (m_connectedIp == newConnectedIp)
+        return;
+    m_connectedIp = newConnectedIp;
+    emit connectedIpChanged();
+}
+void UIManager::setCameraUiEnabled(bool enabled)
+{
+    if (m_cameraUiEnabled == enabled) return;
+    m_cameraUiEnabled = enabled;
+    emit cameraUiEnabledChanged();
+}
+
+void UIManager::setMotionEnabled(bool enabled)
+{
+    if (m_motionEnabled == enabled) return;
+    m_motionEnabled = enabled;
+    emit motionEnabledChanged();
 }

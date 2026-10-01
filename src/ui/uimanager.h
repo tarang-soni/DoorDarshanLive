@@ -1,48 +1,66 @@
-    #ifndef UIMANAGER_H
-    #define UIMANAGER_H
+#ifndef UIMANAGER_H
+#define UIMANAGER_H
 
-    #include <QObject>
-    #include <QQmlEngine>
+#include <QObject>
+#include <QQmlEngine>
 
-    class UIManager : public QObject
-    {
-        Q_OBJECT
-    public:
-        explicit UIManager(QObject *parent = nullptr);
-        Q_INVOKABLE void requestStartStream();
-        Q_INVOKABLE void requestStopStream();
-        Q_INVOKABLE void requestQuit();
-        Q_INVOKABLE void findDevices();
-        Q_INVOKABLE void connectToPi(const QString &ip);
+class UIManager : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(bool piConnected READ piConnected WRITE setPiConnected NOTIFY piConnectedChanged FINAL)
+    Q_PROPERTY(bool isStreaming READ isStreaming WRITE setIsStreaming NOTIFY isStreamingChanged FINAL)
+    Q_PROPERTY(QString connectedIp READ connectedIp WRITE setConnectedIp NOTIFY connectedIpChanged)
 
-        Q_PROPERTY(bool piConnected READ piConnected WRITE setPiConnected NOTIFY piConnectedChanged FINAL)
-        Q_PROPERTY(bool isStreaming READ isStreaming WRITE setIsStreaming NOTIFY isStreamingChanged FINAL)
-        bool piConnected() const;
+    // NEW: Proper placement for UI state toggles
+    Q_PROPERTY(bool cameraUiEnabled READ cameraUiEnabled WRITE setCameraUiEnabled NOTIFY cameraUiEnabledChanged)
+    Q_PROPERTY(bool motionEnabled READ motionEnabled WRITE setMotionEnabled NOTIFY motionEnabledChanged)
 
+public:
+    explicit UIManager(QObject *parent = nullptr);
+    Q_INVOKABLE void requestStartStream();
+    Q_INVOKABLE void requestStopStream();
+    Q_INVOKABLE void requestQuit();
+    Q_INVOKABLE void findDevices();
+    Q_INVOKABLE void connectToPi(const QString &ip);
 
-        bool isStreaming() const;
-        void setIsStreaming(bool newIsStreaming);
+    bool piConnected() const;
+    bool isStreaming() const;
+    void setIsStreaming(bool newIsStreaming);
 
-    public slots:
-        void setPiConnected(bool newPiConnected);
+    QString connectedIp() const;
+    void setConnectedIp(const QString &newConnectedIp);
 
-    signals:
-        void startStreamRequested();
-        void stopStreamRequested();
-        void piConnectedChanged();
-        void isStreamingChanged();
+    bool cameraUiEnabled() const { return m_cameraUiEnabled; }
+    void setCameraUiEnabled(bool enabled);
 
-        void findDevicesRequested();
-        void deviceFound(const QString& ip);
-        void deviceDiscoveryStopped();//can make a qproperty bool m_isdiscoveringdevice
+    bool motionEnabled() const { return m_motionEnabled; }
+    void setMotionEnabled(bool enabled);
 
-        void piConnectionRequested(const QString &ip);
+public slots:
+    void setPiConnected(bool newPiConnected);
 
+signals:
+    void startStreamRequested();
+    void stopStreamRequested();
+    void piConnectedChanged();
+    void isStreamingChanged();
+    void findDevicesRequested();
+    void deviceFound(const QString& ip);
+    void deviceDiscoveryStopped();
+    void piConnectionRequested(const QString &ip);
+    void connectedIpChanged();
 
-    private:
+    // Signals for the new toggles
+    void cameraUiEnabledChanged();
+    void motionEnabledChanged();
 
-        bool m_piConnected;
-        bool m_isStreaming;
-    };
+private:
+    bool m_piConnected = false;
+    bool m_isStreaming = false;
+    QString m_connectedIp;
 
-    #endif // UIMANAGER_H
+    bool m_cameraUiEnabled = false;
+    bool m_motionEnabled = false;
+};
+
+#endif // UIMANAGER_H
