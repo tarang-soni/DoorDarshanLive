@@ -84,14 +84,24 @@ PageFrame {
                         }
                     }
 
+                    // INTERACTIVE DISCONNECT BUTTON
                     Label {
-                        text: app.uiManager.piConnected ? "[ CONNECTED ]" : "[ DISCONNECTED ]"
-                        color: app.uiManager.piConnected ? "#00FF00" : "gray"
+                        text: app.uiManager.piConnected ? "[ DISCONNECT ]" : "[ DISCONNECTED ]"
+                        color: app.uiManager.piConnected ? "#ff5555" : "gray" // Red when connected to indicate disconnect action
                         font.family: Theme.jetbrainsFont
                         font.pixelSize: 16
                         font.bold: true
                         Layout.alignment: Qt.AlignVCenter
                         Layout.rightMargin: 20
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: app.uiManager.piConnected
+                            onClicked: {
+                                app.uiManager.disconnectPi();
+                            }
+                        }
                     }
                 }
             }
@@ -148,7 +158,7 @@ PageFrame {
 
                         delegate: Rectangle {
                             width: ListView.view.width
-                            height: 80 // FIX: Explicit height prevents collapsing
+                            height: 80
                             color: "black"
 
                             RowLayout {
@@ -168,7 +178,7 @@ PageFrame {
                                     Label {
                                         Layout.leftMargin: 20
                                         Layout.fillWidth: true
-                                        text: "IP: " + ipAddress // FIX: Direct scope access
+                                        text: "IP: " + ipAddress
                                         font.family: Theme.jetbrainsFont
                                         font.pixelSize: 15
                                         color: "gray"
@@ -190,9 +200,9 @@ PageFrame {
                                     Layout.rightMargin: 30
                                 }
 
-                                // Hides the button once connected
+                                // Connect button stays visible for any Pi that is NOT the active one
                                 SidebarButton {
-                                    visible: !app.uiManager.piConnected
+                                    visible: ipAddress !== app.uiManager.connectedIp
                                     Layout.preferredHeight: 50
                                     Layout.preferredWidth: 120
                                     Layout.rightMargin: 20
@@ -200,6 +210,9 @@ PageFrame {
                                     fontSize: 16
                                     color: "transparent"
                                     onClicked: {
+                                        if (app.uiManager.piConnected) {
+                                            app.uiManager.disconnectPi();
+                                        }
                                         app.uiManager.connectToPi(ipAddress);
                                     }
                                 }

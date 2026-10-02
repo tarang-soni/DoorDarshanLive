@@ -83,3 +83,17 @@ void UIManager::setMotionEnabled(bool enabled)
     m_motionEnabled = enabled;
     emit motionEnabledChanged();
 }
+void UIManager::disconnectPi()
+{
+    if (!m_piConnected) return;
+
+    // 1. Clear the UI IP string
+    m_connectedIp = "";
+    emit connectedIpChanged();
+
+    // 2. Set connected state to false
+    setPiConnected(false);
+
+    // 3. Tell the NetworkManager to actually stop the stream and close sockets
+    emit piDisconnectRequested();
+}

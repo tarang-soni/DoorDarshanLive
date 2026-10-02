@@ -23,6 +23,8 @@ public slots:
     void onSocketDisconnected();
     void onCommandTransmitted(ServerCommand cmd);
 
+    // NEW: Function to safely drop the connection
+    void disconnectClient();
 signals:
     void streamApproved();
     void streamStopped();

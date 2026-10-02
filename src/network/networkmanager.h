@@ -4,6 +4,7 @@
 #include <QObject>
 #include "tcpconnector.h"
 #include "discoveryservice.h"
+
 class NetworkManager : public QObject
 {
     Q_OBJECT
@@ -19,12 +20,14 @@ signals:
     void deviceDiscoveryStopped();
     void discoveryDeviceFound(const QString& ip);
 
-
 public slots:
     void startStream();
     void stopStream();
     void discoverDevices();
     void connectToPi(const QString& ip);
+
+    // NEW: Slot to handle the disconnect signal from AppController
+    void disconnectFromPi();
 
 private:
     TcpConnector* m_tcpConnector;

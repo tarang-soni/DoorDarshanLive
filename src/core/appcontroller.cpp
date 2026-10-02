@@ -16,6 +16,9 @@ AppController::AppController(QObject *parent)
     connect(m_uiManager,&UIManager::findDevicesRequested,m_networkManager,&NetworkManager::discoverDevices);
     connect(m_uiManager,&UIManager::piConnectionRequested,m_networkManager,&NetworkManager::connectToPi);
 
+    // NEW: Connect the UI disconnect request to the NetworkManager
+    connect(m_uiManager,&UIManager::piDisconnectRequested,m_networkManager,&NetworkManager::disconnectFromPi);
+
     connect(m_networkManager,&NetworkManager::streamApproved,m_uiManager,&UIManager::isStreamingChanged);
     connect(m_networkManager,&NetworkManager::streamApproved,m_videoBridge,&VideoBridge::startListening,Qt::QueuedConnection);
     connect(m_networkManager,&NetworkManager::streamStopped,m_videoBridge,&VideoBridge::stopListening,Qt::QueuedConnection);
@@ -23,9 +26,9 @@ AppController::AppController(QObject *parent)
     connect(m_networkManager,&NetworkManager::deviceDiscoveryStopped,m_uiManager,&UIManager::deviceDiscoveryStopped);
     connect(m_uiManager, &UIManager::cameraUiEnabledChanged, this, &AppController::evaluateStreamState);
     connect(m_uiManager, &UIManager::motionEnabledChanged, this, &AppController::evaluateStreamState);
+
     reloadAIIdentities();
 }
-
 SnapshotManager *AppController::snapshotManager() const
 {
     return m_snapshotManager;

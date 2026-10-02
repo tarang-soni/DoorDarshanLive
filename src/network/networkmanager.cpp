@@ -34,3 +34,16 @@ void NetworkManager::discoverDevices()
 {
     m_discoveryService->discover();
 }
+void NetworkManager::disconnectFromPi()
+{
+    // 1. Stop the video stream so GStreamer cleans up
+    stopStream();
+
+    // 2. Drop the TCP connection
+    if (m_tcpConnector) {
+        m_tcpConnector->disconnectClient();
+    }
+
+    // 3. Update the UI state
+    emit piConnectedChanged(false);
+}

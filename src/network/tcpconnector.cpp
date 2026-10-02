@@ -98,3 +98,15 @@ void TcpConnector::onCommandTransmitted(ServerCommand cmd)
     m_activeClient->write(data);
     m_activeClient->flush();
 }
+void TcpConnector::disconnectClient()
+{
+    if (m_activeClient) {
+        qDebug() << "Forcefully disconnecting client...";
+
+        // Optional: If you have a disconnect command in Protocol.h, you can send it first
+        // onCommandTransmitted(ServerCommand::EndConnection);
+
+        m_activeClient->disconnectFromHost();
+        // This will automatically trigger onSocketDisconnected() to clean up the pointer
+    }
+}

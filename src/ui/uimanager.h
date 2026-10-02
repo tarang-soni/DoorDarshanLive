@@ -11,7 +11,6 @@ class UIManager : public QObject
     Q_PROPERTY(bool isStreaming READ isStreaming WRITE setIsStreaming NOTIFY isStreamingChanged FINAL)
     Q_PROPERTY(QString connectedIp READ connectedIp WRITE setConnectedIp NOTIFY connectedIpChanged)
 
-    // NEW: Proper placement for UI state toggles
     Q_PROPERTY(bool cameraUiEnabled READ cameraUiEnabled WRITE setCameraUiEnabled NOTIFY cameraUiEnabledChanged)
     Q_PROPERTY(bool motionEnabled READ motionEnabled WRITE setMotionEnabled NOTIFY motionEnabledChanged)
 
@@ -22,6 +21,9 @@ public:
     Q_INVOKABLE void requestQuit();
     Q_INVOKABLE void findDevices();
     Q_INVOKABLE void connectToPi(const QString &ip);
+
+    // NEW: Disconnect function for QML
+    Q_INVOKABLE void disconnectPi();
 
     bool piConnected() const;
     bool isStreaming() const;
@@ -48,9 +50,11 @@ signals:
     void deviceFound(const QString& ip);
     void deviceDiscoveryStopped();
     void piConnectionRequested(const QString &ip);
-    void connectedIpChanged();
 
-    // Signals for the new toggles
+    // NEW: Signal to tell NetworkManager to drop the connection
+    void piDisconnectRequested();
+
+    void connectedIpChanged();
     void cameraUiEnabledChanged();
     void motionEnabledChanged();
 
