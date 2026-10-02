@@ -12,7 +12,7 @@ class TcpConnector : public QObject
 public:
     explicit TcpConnector(QObject *parent = nullptr,const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
 
-    inline qint16 getServerPort(){return server->serverPort();}
+    inline quint16 getServerPort(){return server->serverPort();}
 
 private:
     QString GetMessageFromCommand(const ClientResponse resp);
