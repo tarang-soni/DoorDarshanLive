@@ -15,7 +15,7 @@ NetworkManager::NetworkManager(QObject *parent)
 
 void NetworkManager::connectToPi(const QString &ip)
 {
-    qint16 tcpPort = m_tcpConnector->getServerPort();
+    quint16 tcpPort = m_tcpConnector->getServerPort();
     QByteArray packet = "DD_START_TCP:"+QByteArray::number( tcpPort);
     m_discoveryService->sendCommandToDevice(packet,QHostAddress(ip));
 }
