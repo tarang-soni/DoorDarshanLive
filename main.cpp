@@ -1,4 +1,5 @@
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "core/appcontroller.h"
@@ -6,12 +7,12 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+    app.setApplicationVersion(QStringLiteral(DD_APP_VERSION));
+    app.setWindowIcon(QIcon(QStringLiteral(":/qt/qml/qt_DoorDarshanLive/resources/images/app-icon.png")));
 
     QQmlApplicationEngine engine;
     AppController m_appController;
-    //engine.rootContext()->setContextProperty("videoBridge",m_appController.videoBridge());
     engine.rootContext()->setContextProperty("app",&m_appController);
-    //engine.rootContext()->setContextProperty("uiManager",&m_appController.getUiManager());
     engine.addImageProvider(
         "camera",
         new CameraImageProvider(
@@ -24,8 +25,6 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
     engine.loadFromModule("qt_DoorDarshanLive", "Main");
-
-
 
     return QCoreApplication::exec();
 }

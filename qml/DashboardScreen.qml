@@ -1,190 +1,243 @@
 import QtQuick
-import QtQuick.Controls.Basic
 import QtQuick.Layouts
-import Qt.labs.platform
-import "Dashboard"
 
-PageFrame {
-    id: root
-    headerContent: HeadingText {
-        font.pixelSize: 24
-        headingTxt: "Dashboard"
-        anchors.centerIn: parent
-        glyph: "<"
-        mirror: true
+Item {
+    id: page
+
+    readonly property var ui: Session.ui
+    readonly property var db: Session.db
+    readonly property bool connected: ui ? ui.piConnected : false
+
+    readonly property int knownPeople: {
+        Session.identitiesRevision
+        return db ? db.getAllIdentities().length : 0
+    }
+    readonly property int visitsToday: {
+        Session.historyRevision
+        Session.now
+        return db ? db.countVisitsToday() : 0
     }
 
-    content: Item {
+    function greeting() {
+        const hour = new Date(Session.now).getHours()
+        if (hour < 5) return "good night"
+        if (hour < 12) return "good morning"
+        if (hour < 17) return "good afternoon"
+        return "good evening"
+    }
+
+    ColumnLayout {
         anchors.fill: parent
+        spacing: 20
+
+        PageHeader {
+            Layout.fillWidth: true
+            path: "live"
+            title: "Live view"
+            subtitle: page.greeting() + ". watching your front door."
+
+            Pill {
+                text: Qt.formatDateTime(new Date(Session.now), "ddd dd MMM · hh:mm")
+                tone: Theme.textMuted
+            }
+            Pill {
+                text: page.connected ? "Link up" : "Link down"
+                tone: page.connected ? Theme.success : Theme.textFaint
+                dot: true
+                pulsing: page.connected
+            }
+        }
 
         RowLayout {
-            id: liveFeedRow
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: parent.top
-                margins: 20
-            }
-            height: 300
-            spacing: 20
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 14
 
-            // ADDED ID: controlPanel so we can read its properties
-            Dashboard_ControlPanel {
-                id: controlPanel
-                Layout.preferredWidth: 60
-                Layout.fillHeight: true
-            }
-
+            // Left: viewport + controls
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                spacing: 8
+                spacing: 14
 
-                HeadingText {
-                    headingTxt: "Live Preview"
-                    font.pixelSize: 15
-                }
-
-                Rectangle {
+                LiveFeedCard {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: Theme.primary_theme_color
-                    border.width: 1
-                    border.color: Theme.border_theme_color
+                    Layout.minimumHeight: 300
+                }
 
-                        Image {
-                        id: liveFeed
-                        anchors.fill: parent
-                        fillMode: Image.PreserveAspectFit
-                        cache: false
-                        source: "image://camera/live"
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
 
-                        // NEW: Hide video completely if Camera is toggled OFF
-                        visible: app ? app.uiManager.cameraUiEnabled : false
+                    ControlTile {
+                        Layout.fillWidth: true
+                        title: "Camera"
+                        iconName: checked ? "camera" : "camera-off"
+                        checked: page.ui ? page.ui.cameraUiEnabled : false
+                        subtitle: checked ? (Session.streamLive ? "Streaming" : "Starting…") : "Off"
+                        onToggled: Session.setCamera(!checked)
+                    }
+                    ControlTile {
+                        Layout.fillWidth: true
+                        title: "Motion watch"
+                        iconName: "motion"
+                        checked: page.ui ? page.ui.motionEnabled : false
+                        subtitle: checked ? "Armed" : "Disarmed"
+                        onToggled: Session.setMotion(!checked)
+                    }
+                    Rectangle {
+                        implicitWidth: actionsColumn.implicitWidth + 28
+                        implicitHeight: 76
+                        radius: 0
+                        color: Theme.surface
+                        border.width: 1
+                        border.color: Theme.border
 
-                        // Custom properties to store the raw C++ coordinates
-                        property int rawFaceX: 0
-                        property int rawFaceY: 0
-                        property int rawFaceW: 0
-                        property int rawFaceH: 0
-                        property string faceName: ""
-                        property bool faceVisible: false
+                        ColumnLayout {
+                            id: actionsColumn
+                            anchors.centerIn: parent
+                            spacing: 6
+                            AppButton {
+                                Layout.fillWidth: true
+                                compact: true
+                                variant: "primary"
+                                text: "Snapshot"
+                                iconName: "snapshot"
+                                onClicked: Session.takeSnapshot()
+                            }
+                            AppButton {
+                                Layout.fillWidth: true
+                                compact: true
+                                variant: "secondary"
+                                text: "Reconnect"
+                                iconName: "refresh"
+                                onClicked: Session.reconnect()
+                            }
+                        }
+                    }
+                }
+            }
 
-                        // The dynamic Bounding Box
-                        Rectangle {
-                            id: faceBox
-                            visible: liveFeed.faceVisible
-                            color: "transparent"
-                            border.color: (liveFeed.faceName !== "" && liveFeed.faceName !== "Unknown") ? "#00FF00" : "#FFB800"
-                            border.width: 3
+            // Right: telemetry
+            ColumnLayout {
+                Layout.preferredWidth: 350
+                Layout.maximumWidth: 350
+                Layout.fillHeight: true
+                spacing: 14
 
-                            property real scaleX: liveFeed.paintedWidth / (liveFeed.sourceSize.width || 640)
-                            property real scaleY: liveFeed.paintedHeight / (liveFeed.sourceSize.height || 480)
-                            property real offsetX: (liveFeed.width - liveFeed.paintedWidth) / 2
-                            property real offsetY: (liveFeed.height - liveFeed.paintedHeight) / 2
+                Card {
+                    Layout.fillWidth: true
+                    title: "System status"
 
-                            x: (liveFeed.rawFaceX * scaleX) + offsetX
-                            y: (liveFeed.rawFaceY * scaleY) + offsetY
-                            width: liveFeed.rawFaceW * scaleX
-                            height: liveFeed.rawFaceH * scaleY
+                    Column {
+                        width: parent.width
+                        spacing: 12
 
-                            // The Name Label attached to the top of the box
-                            Rectangle {
-                                anchors.bottom: parent.top
-                                anchors.left: parent.left
-                                width: parent.width
-                                height: 26
-                                color: (liveFeed.faceName !== "" && liveFeed.faceName !== "Unknown") ? "#00FF00" : "#FFB800"
+                        StatusLine {
+                            label: "Doorbell"
+                            value: page.connected ? page.ui.connectedIp : Session.connectingIp !== "" ? "linking…" : "offline"
+                            tone: page.connected ? Theme.success : Session.connectingIp !== "" ? Theme.warning : Theme.textFaint
+                            pulsing: page.connected
+                        }
+                        StatusLine {
+                            label: "Stream"
+                            value: Session.streamLive ? "live · rtp/jpeg" : page.ui && page.ui.isStreaming ? "starting" : "idle"
+                            tone: Session.streamLive ? Theme.live : page.ui && page.ui.isStreaming ? Theme.warning : Theme.textFaint
+                            pulsing: Session.streamLive
+                        }
+                        StatusLine {
+                            label: "Motion"
+                            value: page.ui && page.ui.motionEnabled ? "armed" : "disarmed"
+                            tone: page.ui && page.ui.motionEnabled ? Theme.accent : Theme.textFaint
+                        }
+                        StatusLine {
+                            label: "At door"
+                            value: Session.faceVisible ? (Session.faceKnown ? Session.faceName : "unknown visitor") : "nobody"
+                            tone: Session.faceVisible ? (Session.faceKnown ? Theme.success : Theme.warning) : Theme.textFaint
+                        }
+                    }
+                }
 
-                                Label {
-                                    anchors.centerIn: parent
-                                    text: liveFeed.faceName
-                                    color: "black"
-                                    font.family: Theme.jetbrainsFont
-                                    font.pixelSize: 14
-                                    font.bold: true
-                                }
+                Card {
+                    Layout.fillWidth: true
+                    title: "Video stream"
+
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: 10
+
+                        RowLayout {
+                            Text {
+                                Layout.alignment: Qt.AlignBaseline
+                                text: Session.fps
+                                color: Theme.text
+                                font.family: Theme.fontMono
+                                font.pixelSize: 34
+                                font.weight: Font.Light
+                            }
+                            Text {
+                                Layout.alignment: Qt.AlignBaseline
+                                text: "fps"
+                                color: Theme.textFaint
+                                font.family: Theme.fontMono
+                                font.pixelSize: 12
+                            }
+                            Item { Layout.fillWidth: true }
+                            Pill {
+                                text: Session.streamLive && Session.resolution ? Session.resolution : "no signal"
+                                tone: Session.streamLive ? Theme.accent : Theme.textFaint
+                            }
+                        }
+                        FpsChart {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 64
+                            samples: Session.fpsHistory
+                        }
+                        RowLayout {
+                            Text {
+                                Layout.fillWidth: true
+                                text: "-60s"
+                                color: Theme.textFaint
+                                font.family: Theme.fontMono
+                                font.pixelSize: 10
+                            }
+                            Text {
+                                text: "now"
+                                color: Theme.textFaint
+                                font.family: Theme.fontMono
+                                font.pixelSize: 10
                             }
                         }
                     }
                 }
 
-                Connections {
-                    target: app ? app.videoBridge : null
-
-                    function onFrameReady() {
-                        // Only pull image updates if the video is visible to save CPU!
-                        if (liveFeed.visible) {
-                            liveFeed.source = ""
-                            liveFeed.source = "image://camera/live?" + Date.now()
-                        }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+                    StatTile {
+                        Layout.fillWidth: true
+                        label: "Visits today"
+                        value: Theme.pad(page.visitsToday, 2)
+                        tone: Theme.warning
                     }
-
-                    function onStreamStopped() {
-                        liveFeed.source = ""
-                        liveFeed.faceVisible = false
-                    }
-
-                    function onFaceDetected(faceX, faceY, faceW, faceH, faceName) {
-                        // Only draw the green box if video is visible
-                        if (liveFeed.visible) {
-                            liveFeed.rawFaceX = faceX
-                            liveFeed.rawFaceY = faceY
-                            liveFeed.rawFaceW = faceW
-                            liveFeed.rawFaceH = faceH
-                            liveFeed.faceName = faceName
-                            liveFeed.faceVisible = true
-                        }
-                    }
-
-                    function onFaceLost() {
-                        liveFeed.faceVisible = false
-                    }
-                    function onMotionAlertTriggered() {
-                        console.log("System Alert: Motion & Face threshold met!");
-                        if (app) {
-                            app.takeManualSnapshot();
-
-                            var name = liveFeed.faceName;
-                            var visitorStr = (name !== "" && name !== "Unknown") ? name : "An Unknown Visitor";
-
-                            appTrayIcon.showMessage("DoorDarshan Alert \uD83D\uDD14",
-                                                    visitorStr + " is lingering at the door.",
-                                                    SystemTrayIcon.Information,
-                                                    5000);
-
-                            // NEW: Automatically maximize the app right to the screen!
-                            mainWindow.forceRestoreWindow();
-                        }
+                    StatTile {
+                        Layout.fillWidth: true
+                        label: "Known people"
+                        value: Theme.pad(page.knownPeople, 2)
+                        tone: Theme.success
                     }
                 }
-            }
 
-            Dashboard_DeviceStats {
-                Layout.preferredWidth: 240
-                Layout.fillHeight: true
-            }
-        }
+                Card {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 140
+                    title: "Logs"
 
-        RowLayout {
-            anchors {
-                left: liveFeedRow.left
-                right: liveFeedRow.right
-                top: liveFeedRow.bottom
-                bottom: parent.bottom
-                topMargin: 20
-                bottomMargin: 20
-            }
-            spacing: 20
-
-            Dashboard_RecentActivity {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-            }
-
-            Dashboard_SystemInfo {
-                Layout.preferredWidth: 240
-                Layout.fillHeight: true
+                    ActivityFeed {
+                        anchors.fill: parent
+                    }
+                }
             }
         }
     }

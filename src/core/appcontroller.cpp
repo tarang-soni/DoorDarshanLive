@@ -19,13 +19,25 @@ AppController::AppController(QObject *parent)
     // NEW: Connect the UI disconnect request to the NetworkManager
     connect(m_uiManager,&UIManager::piDisconnectRequested,m_networkManager,&NetworkManager::disconnectFromPi);
 
-    connect(m_networkManager,&NetworkManager::streamApproved,m_uiManager,&UIManager::isStreamingChanged);
+    connect(m_networkManager,&NetworkManager::streamApproved,m_uiManager,[this]{ m_uiManager->setIsStreaming(true); });
+    connect(m_networkManager,&NetworkManager::streamStopped,m_uiManager,[this]{ m_uiManager->setIsStreaming(false); });
     connect(m_networkManager,&NetworkManager::streamApproved,m_videoBridge,&VideoBridge::startListening,Qt::QueuedConnection);
     connect(m_networkManager,&NetworkManager::streamStopped,m_videoBridge,&VideoBridge::stopListening,Qt::QueuedConnection);
     connect(m_networkManager,&NetworkManager::discoveryDeviceFound,m_uiManager,&UIManager::deviceFound);
     connect(m_networkManager,&NetworkManager::deviceDiscoveryStopped,m_uiManager,&UIManager::deviceDiscoveryStopped);
     connect(m_uiManager, &UIManager::cameraUiEnabledChanged, this, &AppController::evaluateStreamState);
     connect(m_uiManager, &UIManager::motionEnabledChanged, this, &AppController::evaluateStreamState);
+
+    // A dropped Pi never sends StreamStopped, so stop the pipeline here. When it
+    // comes back, ask for the stream again if the camera or motion watch is on.
+    connect(m_networkManager, &NetworkManager::piConnectedChanged, this, [this](bool connected) {
+        if (connected) {
+            evaluateStreamState();
+        } else {
+            m_videoBridge->stopListening();
+            m_uiManager->setIsStreaming(false);
+        }
+    });
 
     reloadAIIdentities();
 }

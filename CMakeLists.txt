@@ -13,63 +13,93 @@ qt_standard_project_setup(REQUIRES 6.11)
 qt_add_executable(appqt_DoorDarshanLive
     main.cpp
 )
-set_source_files_properties(qml/Theme.qml
+set_source_files_properties(qml/Theme.qml qml/Session.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+target_compile_definitions(appqt_DoorDarshanLive PRIVATE
+    DD_APP_VERSION="${PROJECT_VERSION}"
 )
 
 qt_add_qml_module(appqt_DoorDarshanLive
     URI qt_DoorDarshanLive
 
-    QML_FILES
-        Main.qml
-
     SOURCES
         src/core/appcontroller.h
         src/core/appcontroller.cpp
+        src/core/databasemanager.h
+        src/core/databasemanager.cpp
+        src/core/utils.h
 
+        src/network/Protocol.h
+        src/network/discoveryservice.h
+        src/network/discoveryservice.cpp
         src/network/networkmanager.h
         src/network/networkmanager.cpp
         src/network/tcpconnector.h
         src/network/tcpconnector.cpp
-        src/network/Protocol.h
 
         src/ui/uimanager.h
         src/ui/uimanager.cpp
 
+        src/video/faceai.h
         src/video/videobridge.h
         src/video/videobridge.cpp
         src/video/cameraimageprovider.h
         src/video/cameraimageprovider.cpp
+        src/video/snapshotmanager.h
+        src/video/snapshotmanager.cpp
 
     RESOURCES
         resources/fonts/JetBrainsMono-VariableFont_wght.ttf
         resources/fonts/Saira-VariableFont_wdth,wght.ttf
+        resources/images/app-icon.png
+        resources/images/tray.png
 
     QML_FILES
-        qml/CustomBorder.qml
-        qml/DashboardScreen.qml
-        qml/PageFrame.qml
-        qml/SidePanel.qml
-        qml/SidebarButton.qml
+        Main.qml
+
+        # App-wide state
         qml/Theme.qml
-        qml/StatusRow.qml
-        qml/Dashboard/Dashboard_ControlPanel.qml
-        qml/Dashboard/Dashboard_DeviceStats.qml
-        qml/Dashboard/Dashboard_SystemInfo.qml
-        qml/Dashboard/Dashboard_RecentActivity.qml
-        QML_FILES qml/HistoryScreen.qml
-        QML_FILES qml/DeviceSetupScreen.qml
-        QML_FILES qml/SettingsScreen.qml
-        QML_FILES qml/HeadingText.qml
-        QML_FILES qml/BoolStatusRow.qml
-        QML_FILES
-        SOURCES src/network/discoveryservice.h src/network/discoveryservice.cpp
-        SOURCES src/core/utils.h
-        SOURCES
-        SOURCES src/video/faceai.h
-        QML_FILES qml/SavedVisitors.qml
-        SOURCES src/core/databasemanager.h src/core/databasemanager.cpp
-        SOURCES src/video/snapshotmanager.h src/video/snapshotmanager.cpp
+        qml/Session.qml
+
+        # Screens
+        qml/Sidebar.qml
+        qml/DashboardScreen.qml
+        qml/HistoryScreen.qml
+        qml/PeopleScreen.qml
+        qml/DeviceSetupScreen.qml
+        qml/SettingsScreen.qml
+
+        # Screen sections
+        qml/LiveFeedCard.qml
+        qml/ActivityFeed.qml
+        qml/SnapshotCard.qml
+
+        # Components
+        qml/AppButton.qml
+        qml/AppDialog.qml
+        qml/AppIcon.qml
+        qml/Avatar.qml
+        qml/BusySpinner.qml
+        qml/Brackets.qml
+        qml/CalloutTag.qml
+        qml/FpsChart.qml
+        qml/SegmentMeter.qml
+        qml/Card.qml
+        qml/ControlTile.qml
+        qml/EmptyState.qml
+        qml/NavItem.qml
+        qml/PageHeader.qml
+        qml/Pill.qml
+        qml/Radar.qml
+        qml/RoundedImage.qml
+        qml/SegmentedControl.qml
+        qml/SettingRow.qml
+        qml/StatTile.qml
+        qml/StatusDot.qml
+        qml/StatusLine.qml
+        qml/ToastHost.qml
+        qml/ToggleSwitch.qml
 )
 target_include_directories(appqt_DoorDarshanLive PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src

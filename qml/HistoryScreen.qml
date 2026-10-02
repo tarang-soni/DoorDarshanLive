@@ -1,302 +1,301 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
-import "Dashboard"
 
-PageFrame {
-    id: root
+Item {
+    id: page
 
-    headerContent: HeadingText {
-        font.pixelSize: 24
-        headingTxt: "History Log"
-        anchors.centerIn: parent
-        glyph: "<"
-        mirror: true
-    }
+    readonly property var db: Session.db
+    property string filter: "all"
+    property int totalCount: 0
+    property int knownCount: 0
 
-    ListModel {
-        id: historyModel
-    }
+    ListModel { id: historyModel }
 
-    function loadHistory() {
-        historyModel.clear();
-        if (app && app.databaseManager) {
-            var logs = app.databaseManager.getHistoryLogs();
-            for (var i = 0; i < logs.length; i++) {
-                historyModel.append(logs[i]);
-            }
+    function reload() {
+        historyModel.clear()
+        const logs = db ? db.getHistoryLogs() : []
+        let known = 0
+        for (let i = 0; i < logs.length; ++i) {
+            const log = logs[i]
+            if (log.isKnown) known++
+            if (filter === "all" || (filter === "known") === log.isKnown)
+                historyModel.append(log)
         }
+        totalCount = logs.length
+        knownCount = known
     }
 
-    Component.onCompleted: {
-        loadHistory();
+    onFilterChanged: reload()
+    Component.onCompleted: reload()
+
+    Connections {
+        target: Session
+        function onHistoryRevisionChanged() { page.reload() }
     }
 
-    content: Item {
+    ColumnLayout {
         anchors.fill: parent
+        spacing: 22
 
-        // --- THE SAVE FACE DIALOG POPUP ---
-        Popup {
-            id: saveFaceDialog
-            width: 450
-            height: 250
-            anchors.centerIn: parent
-            modal: true
-            focus: true
-            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        PageHeader {
+            Layout.fillWidth: true
+            path: "history"
+            title: "History"
+            subtitle: page.totalCount === 0 ? "snapshots of everyone who came to the door."
+                                            : page.totalCount + (page.totalCount === 1 ? " record" : " records")
+                                              + " · " + page.knownCount + " recognised"
 
-            // Properties to hold the data of the row we clicked
-            property int targetHistoryId: -1
-            property string targetImagePath: ""
-
-            background: Rectangle {
-                color: Theme.primary_theme_color
-                border.color: Theme.border_theme_color
-                border.width: 1
+            SegmentedControl {
+                current: page.filter
+                model: [
+                    { key: "all", label: "All" },
+                    { key: "known", label: "Known" },
+                    { key: "unknown", label: "Unknown" }
+                ]
+                onActivated: (key) => page.filter = key
             }
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 30
-                spacing: 20
-
-                Label {
-                    Layout.fillWidth: true
-                    text: "Identify Visitor"
-                    color: "white"
-                    font.family: Theme.jetbrainsFont
-                    font.pixelSize: 20
-                    font.bold: true
-                }
-
-                TextField {
-                    id: nameInput
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 50
-                    placeholderText: "e.g., Rahul, Swiggy Delivery..."
-                    color: "white"
-                    font.family: Theme.jetbrainsFont
-                    font.pixelSize: 16
-
-                    background: Rectangle {
-                        color: "black"
-                        // Glows white instead of green to match your minimal theme
-                        border.color: nameInput.activeFocus ? "white" : Theme.border_theme_color
-                        border.width: 1
-                    }
-                }
-
-                Item { Layout.fillHeight: true } // Pushes buttons to the bottom
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 20
-
-                    SidebarButton {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 45
-                        text: "Cancel"
-                        fontSize: 14
-                        color: "transparent"
-                        onClicked: {
-                            saveFaceDialog.close()
-                            nameInput.text = ""
-                        }
-                    }
-
-                    SidebarButton {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 45
-                        text: "Save Identity"
-                        fontSize: 14
-                        color: "transparent"
-                        onClicked: {
-                            if (nameInput.text.trim() !== "") {
-                                if (app && app.databaseManager) {
-                                    var success = app.databaseManager.nameUnknownVisitor(saveFaceDialog.targetHistoryId, nameInput.text.trim());
-                                    if (success) {
-                                        loadHistory();
-                                        app.reloadAIIdentities();
-                                    }
-                                }
-                                saveFaceDialog.close();
-                                nameInput.text = "";
-                            }
-                        }
-                    }
-                }
+            AppButton {
+                variant: "danger"
+                text: "Clear all"
+                iconName: "trash"
+                enabled: page.totalCount > 0
+                onClicked: clearDialog.open()
             }
         }
 
-        // --- MAIN PAGE LAYOUT ---
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 40
-            anchors.topMargin: 20
-            spacing: 15
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
+            GridView {
+                id: grid
+                anchors.fill: parent
+                anchors.margins: -7
+                clip: true
+                model: historyModel
+                boundsBehavior: Flickable.StopAtBounds
+                readonly property int columns: Math.max(1, Math.floor(width / 300))
+                cellWidth: Math.floor(width / columns)
+                cellHeight: Math.round((cellWidth - 34) * 0.56) + 112
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-                Label {
-                    Layout.fillWidth: true
-                    text: "Recent Snapshots (" + historyModel.count + ")"
-                    font.family: Theme.jetbrainsFont
-                    font.pixelSize: 18
-                    color: "white"
-                }
+                // The model has an "id" role, which can't be a QML property, so read roles via `model`.
+                delegate: SnapshotCard {
+                    width: grid.cellWidth
+                    height: grid.cellHeight
+                    entryId: model.id
+                    imagePath: model.imagePath
+                    visitorName: model.visitorName
+                    isKnown: model.isKnown
+                    timestamp: model.timestamp
+                    iso: model.iso || ""
 
-                SidebarButton {
-                    Layout.preferredHeight: 50
-                    Layout.preferredWidth: 160
-                    text: "Clear History"
-                    fontSize: 14
-                    color: "transparent"
-                    onClicked: {
-                        if (app && app.databaseManager) {
-                            app.databaseManager.clearHistory();
-                            loadHistory();
-                        }
+                    onPreviewRequested: preview.show(imagePath, isKnown ? visitorName : "Unknown visitor", timestamp)
+                    onNameRequested: nameDialog.openFor(entryId, imagePath)
+                    onDeleteRequested: {
+                        deleteDialog.targetId = entryId
+                        deleteDialog.open()
                     }
                 }
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: Theme.primary_theme_color
+            EmptyState {
+                anchors.centerIn: parent
+                visible: historyModel.count === 0
+                iconName: "history"
+                title: page.totalCount === 0 ? "No visitors yet" : "Nothing in this filter"
+                message: page.totalCount === 0
+                         ? "Snapshots appear here when someone lingers at the door or you press Snapshot on the live view."
+                         : "Try a different filter to see the rest of your history."
+                AppButton {
+                    visible: page.totalCount === 0
+                    text: "Open live view"
+                    iconName: "dashboard"
+                    onClicked: Session.navigate("dashboard")
+                }
+            }
+        }
+    }
+
+    AppDialog {
+        id: clearDialog
+        title: "Clear all history?"
+        message: "This removes all " + page.totalCount + " snapshots from History. People you've already named stay saved."
+        iconName: "trash"
+        tone: Theme.danger
+        destructive: true
+        confirmText: "Clear history"
+        onConfirmed: {
+            page.db.clearHistory()
+            Session.historyRevision++
+            Session.notify("History cleared", "success")
+        }
+    }
+
+    AppDialog {
+        id: deleteDialog
+        property int targetId: -1
+        title: "Delete this snapshot?"
+        message: "It will be removed from History. This can't be undone."
+        iconName: "trash"
+        tone: Theme.danger
+        destructive: true
+        confirmText: "Delete"
+        onConfirmed: {
+            if (page.db.deleteHistoryLog(targetId)) {
+                Session.historyRevision++
+                Session.notify("Snapshot deleted", "success")
+            }
+        }
+    }
+
+    AppDialog {
+        id: nameDialog
+        property int targetId: -1
+        property string targetImage: ""
+
+        function openFor(id, imagePath) {
+            targetId = id
+            targetImage = imagePath
+            nameField.text = ""
+            open()
+            nameField.forceActiveFocus()
+        }
+
+        function save() {
+            const name = nameField.text.trim()
+            if (name === "") return
+            if (page.db.nameUnknownVisitor(targetId, name)) {
+                app.reloadAIIdentities()
+                Session.identitiesRevision++
+                Session.historyRevision++
+                Session.notify("Saved " + name + ". DoorDarshan will recognise them next time.", "success")
+            } else {
+                Session.notify("Couldn't save that name", "danger")
+            }
+        }
+
+        title: "Who is this?"
+        message: "Give this visitor a name and DoorDarshan will greet them by name next time."
+        iconName: "user-plus"
+        confirmText: "Save person"
+        confirmEnabled: nameField.text.trim() !== ""
+        onConfirmed: save()
+
+        RoundedImage {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 200
+            source: Theme.fileUrl(nameDialog.targetImage)
+        }
+        TextField {
+            id: nameField
+            Layout.fillWidth: true
+            Layout.preferredHeight: 46
+            placeholderText: "> name, e.g. Rahul (Swiggy)"
+            placeholderTextColor: Theme.textFaint
+            color: Theme.text
+            font.family: Theme.fontMono
+            font.pixelSize: 13
+            leftPadding: 14
+            selectByMouse: true
+            selectionColor: Theme.tint(Theme.accent, 0.5)
+            cursorDelegate: Rectangle {
+                width: 8
+                color: Theme.accent
+                visible: nameField.activeFocus
+                SequentialAnimation on opacity {
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 1; duration: 0 }
+                    PauseAnimation { duration: 530 }
+                    NumberAnimation { to: 0; duration: 0 }
+                    PauseAnimation { duration: 530 }
+                }
+            }
+            background: Rectangle {
+                radius: 0
+                color: Theme.surfaceSunken
                 border.width: 1
-                border.color: Theme.border_theme_color
-
-                Label {
-                    anchors.centerIn: parent
-                    text: "No history logs found."
-                    color: "gray"
-                    font.family: Theme.jetbrainsFont
-                    font.pixelSize: 16
-                    visible: historyModel.count === 0
+                border.color: nameField.activeFocus ? Theme.accent : Theme.borderStrong
+            }
+            onAccepted: {
+                if (nameDialog.confirmEnabled) {
+                    nameDialog.save()
+                    nameDialog.close()
                 }
+            }
+        }
+    }
 
-                ScrollView {
-                    anchors.fill: parent
-                    anchors.margins: 1
-                    clip: true
+    // Full-size snapshot viewer
+    Popup {
+        id: preview
+        property string imagePath: ""
+        property string caption: ""
+        property string when: ""
 
-                    ListView {
-                        width: parent.width
-                        spacing: 2
-                        model: historyModel
+        function show(path, who, stamp) {
+            imagePath = path
+            caption = who
+            when = stamp
+            open()
+        }
 
-                        delegate: Rectangle {
-                            width: ListView.view.width
-                            height: 100
-                            color: "black"
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min(parent.width - 120, 980)
+        height: Math.min(parent.height - 120, 720)
+        padding: 0
+        modal: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 20
+        Overlay.modal: Rectangle { color: Qt.rgba(0, 0, 0, 0.85) }
+        enter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 160 }
+                NumberAnimation { property: "scale"; from: 0.96; to: 1; duration: 220; easing.type: Easing.OutCubic }
+            }
+        }
+        exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: 120 } }
 
-                                // Image Thumbnail
-                                Rectangle {
-                                    Layout.preferredWidth: 80
-                                    Layout.preferredHeight: 80
-                                    color: "#1A1A1A"
-                                    border.color: Theme.border_theme_color
-                                    border.width: 1
+        background: Rectangle {
+            radius: 0
+            color: Theme.surfaceSunken
+            border.width: 1
+            border.color: Theme.borderStrong
+            Brackets { color: Theme.accent; length: 18 }
+        }
 
-                                    Image {
-                                        anchors.fill: parent
-                                        anchors.margins: 1
-                                        source: model.imagePath ? "file:///" + model.imagePath : ""
-                                        fillMode: Image.PreserveAspectCrop
-                                        asynchronous: true
-
-                                        Label {
-                                            anchors.centerIn: parent
-                                            text: "IMG"
-                                            color: "gray"
-                                            font.family: Theme.jetbrainsFont
-                                            font.pixelSize: 12
-                                            visible: parent.status === Image.Error || parent.status === Image.Null
-                                        }
-                                    }
-                                }
-
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 5
-
-                                    Label {
-                                        Layout.fillWidth: true
-                                        text: model.visitorName
-                                        font.family: Theme.jetbrainsFont
-                                        font.pixelSize: 18
-                                        font.bold: true
-                                        color: model.isKnown ? "#00FF00" : "white"
-                                    }
-
-                                    Label {
-                                        Layout.fillWidth: true
-                                        text: model.timestamp
-                                        font.family: Theme.jetbrainsFont
-                                        font.pixelSize: 14
-                                        color: "gray"
-                                    }
-                                }
-
-                                // KNOWN/UNKNOWN Badge
-                                Rectangle {
-                                    Layout.preferredWidth: 90
-                                    Layout.preferredHeight: 30
-                                    color: "transparent"
-                                    border.color: Theme.border_theme_color
-                                    radius: 4
-
-                                    Label {
-                                        anchors.centerIn: parent
-                                        text: model.isKnown ? "KNOWN" : "UNKNOWN"
-                                        color: model.isKnown ? "#00FF00" : "#FF4444"
-                                        font.family: Theme.jetbrainsFont
-                                        font.pixelSize: 12
-                                        font.bold: true
-                                    }
-                                }
-
-                                SidebarButton {
-                                    visible: !model.isKnown
-                                    Layout.preferredHeight: 40
-                                    Layout.preferredWidth: 120
-                                    Layout.leftMargin: 10
-                                    text: "Save Face"
-                                    fontSize: 14
-                                    color: "transparent"
-                                    onClicked: {
-                                        saveFaceDialog.targetHistoryId = model.id;
-                                        saveFaceDialog.targetImagePath = model.imagePath;
-                                        saveFaceDialog.open();
-                                    }
-                                }
-
-                                SidebarButton {
-                                    Layout.preferredHeight: 40
-                                    Layout.preferredWidth: 100
-                                    Layout.leftMargin: 10
-                                    Layout.rightMargin: 10
-                                    text: "Delete"
-                                    fontSize: 14
-                                    color: "transparent"
-                                    onClicked: {
-                                        // Removes it locally from UI for now
-                                        historyModel.remove(index);
-                                        // Optional: You can add app.databaseManager.deleteHistoryLog(model.id) later
-                                    }
-                                }
-                            }
-                        }
-                    }
+        contentItem: Item {
+            RoundedImage {
+                anchors.fill: parent
+                anchors.margins: 14
+                fillMode: Image.PreserveAspectFit
+                source: Theme.fileUrl(preview.imagePath)
+            }
+            ColumnLayout {
+                anchors { left: parent.left; bottom: parent.bottom; margins: 30 }
+                spacing: 0
+                CalloutTag {
+                    text: preview.caption
+                    tone: Theme.accent
+                    fontSize: 14
                 }
+                Text {
+                    topPadding: 6
+                    text: preview.when
+                    color: Theme.text
+                    font.family: Theme.fontMono
+                    font.pixelSize: 12
+                    style: Text.Outline
+                    styleColor: Qt.rgba(0, 0, 0, 0.6)
+                }
+            }
+            AppButton {
+                anchors { right: parent.right; top: parent.top; margins: 22 }
+                variant: "secondary"
+                iconName: "close"
+                onClicked: preview.close()
             }
         }
     }

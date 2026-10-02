@@ -29,6 +29,8 @@ public:
     Q_INVOKABLE bool logHistoryEvent(int identityId, bool isKnown, const QString &imagePath, const QByteArray &faceEncoding = QByteArray());
     Q_INVOKABLE QVariantList getHistoryLogs();
     Q_INVOKABLE void clearHistory();
+    Q_INVOKABLE bool deleteHistoryLog(int historyId);
+    Q_INVOKABLE int countVisitsToday();
 
     // Unknown Visitor Promotion
     Q_INVOKABLE bool nameUnknownVisitor(int historyId, const QString &newName);

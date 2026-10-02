@@ -1,6 +1,19 @@
 #include "databasemanager.h"
 #include <QStandardPaths>
 #include <QDir>
+#include <QTimeZone>
+
+namespace {
+
+// SQLite CURRENT_TIMESTAMP is UTC; show it in the user's local time.
+QDateTime localTime(const QVariant &utcValue)
+{
+    QDateTime dt = utcValue.toDateTime();
+    dt.setTimeZone(QTimeZone::UTC);
+    return dt.toLocalTime();
+}
+
+}
 
 DatabaseManager::DatabaseManager(QObject *parent) : QObject(parent)
 {
@@ -80,6 +93,10 @@ bool DatabaseManager::removeIdentity(int id)
     query.bindValue(":id", id);
     bool ok = query.exec();
     if (ok) {
+        // Their past visits would otherwise stay "known" with no name to show.
+        query.prepare("UPDATE History SET is_known = 0, identity_id = NULL WHERE identity_id = :id");
+        query.bindValue(":id", id);
+        query.exec();
         emit identitiesUpdated();
     }
     return ok;
@@ -105,8 +122,9 @@ QVariantList DatabaseManager::getAllIdentities()
         map["id"] = query.value("id").toInt();
         map["personName"] = query.value("name").toString();
         map["imagePath"] = query.value("image_path").toString();
-        QDateTime dt = query.value("date_added").toDateTime();
+        QDateTime dt = localTime(query.value("date_added"));
         map["dateAdded"] = "Enrolled: " + dt.toString("MMM dd, yyyy");
+        map["addedOn"] = dt.toString("MMM d, yyyy");
         list.append(map);
     }
     return list;
@@ -142,8 +160,9 @@ QVariantList DatabaseManager::getHistoryLogs()
         map["visitorName"] = isKnown ? query.value("name").toString() : "Unknown Visitor";
         map["imagePath"] = query.value("image_path").toString();
 
-        QDateTime dt = query.value("timestamp").toDateTime();
+        QDateTime dt = localTime(query.value("timestamp"));
         map["timestamp"] = dt.toString("MMM dd, yyyy - HH:mm");
+        map["iso"] = dt.toString(Qt::ISODate);
 
         list.append(map);
     }
@@ -154,6 +173,21 @@ void DatabaseManager::clearHistory()
 {
     QSqlQuery query("DELETE FROM History");
     query.exec();
+}
+
+bool DatabaseManager::deleteHistoryLog(int historyId)
+{
+    QSqlQuery query;
+    query.prepare("DELETE FROM History WHERE id = :id");
+    query.bindValue(":id", historyId);
+    return query.exec() && query.numRowsAffected() > 0;
+}
+
+int DatabaseManager::countVisitsToday()
+{
+    QSqlQuery query("SELECT COUNT(*) FROM History "
+                    "WHERE date(timestamp, 'localtime') = date('now', 'localtime')");
+    return query.next() ? query.value(0).toInt() : 0;
 }
 
 bool DatabaseManager::nameUnknownVisitor(int historyId, const QString &newName)

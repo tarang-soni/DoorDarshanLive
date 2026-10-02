@@ -1,144 +1,204 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
-import "Dashboard"
 
-PageFrame {
-    id: root
+Item {
+    id: page
 
-    // Tracks which tab is currently visible
-    property int currentTabIndex: 0
-
-    headerContent: HeadingText {
-        font.pixelSize: 24
-        headingTxt: "Settings"
-        anchors.centerIn: parent
-        glyph: "<"
-        mirror: true
+    readonly property var db: Session.db
+    readonly property int historyCount: {
+        Session.historyRevision
+        return db ? db.getHistoryLogs().length : 0
     }
 
-    content: Item {
+    ColumnLayout {
         anchors.fill: parent
+        spacing: 14
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 40
-            anchors.topMargin: 20
-            spacing: 15
+        PageHeader {
+            Layout.fillWidth: true
+            path: "settings"
+            title: "Settings"
+            subtitle: "choose how doordarshan watches your door and lets you know."
+        }
 
-            // --- TOP TAB BAR ---
+        ScrollView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentWidth: availableWidth
+            clip: true
+
             RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
+                width: parent.width
+                spacing: 14
 
-                Repeater {
-                    model: ["General", "Camera", "Network", "Alerts", "About"]
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 14
 
-                    SidebarButton {
+                    Card {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 60
+                        title: "Live view"
+                        iconName: "camera"
 
-                        text: modelData
-                        fontSize: 16
-                        color: "transparent"
-
-                        // Let your custom component handle the highlighting!
-                        isSelected: root.currentTabIndex === index
-
-                        onClicked: {
-                            root.currentTabIndex = index
-                        }
-                    }
-                }
-            }
-
-            // --- SETTINGS CONTENT AREA ---
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: Theme.primary_theme_color
-                border.width: 1
-                border.color: Theme.border_theme_color
-
-                StackLayout {
-                    anchors.fill: parent
-                    anchors.margins: 1
-                    currentIndex: root.currentTabIndex
-
-                    // 0: GENERAL TAB
-                    ScrollView {
-                        clip: true
-                        ColumnLayout {
+                        Column {
                             width: parent.width
-                            spacing: 2
-
-                            SettingToggleRow { text: "Launch on System Startup"; checked: false }
-                            SettingToggleRow { text: "Auto-Delete History After 30 Days"; checked: true }
-
-                            SettingActionRow {
-                                text: "Local Database"
-                                buttonText: "Clear All History"
-                                onClicked: console.log("Clear History Clicked")
+                            SettingRow {
+                                iconName: "eye"
+                                title: "Show face boxes"
+                                description: "Outline faces on the live feed and label people you've named."
+                                divider: false
+                                ToggleSwitch {
+                                    checked: Session.prefs.showFaceOverlay
+                                    onToggled: Session.prefs.showFaceOverlay = checked
+                                }
                             }
                         }
                     }
 
-                    // 1: CAMERA & AI TAB
-                    ScrollView {
-                        clip: true
-                        ColumnLayout {
+                    Card {
+                        Layout.fillWidth: true
+                        title: "Visitor alerts"
+                        subtitle: "fire when motion watch sees a face for ~1 second (30 frames)"
+                        iconName: "bell"
+
+                        Column {
                             width: parent.width
-                            spacing: 2
-
-                            SettingToggleRow { text: "Enable YuNet Face Detection"; checked: true }
-                            SettingToggleRow { text: "Show AI Overlays on Live Feed"; checked: true }
-
-                            SettingSliderRow { text: "Detection Confidence Threshold"; value: 85 }
-                            SettingSliderRow { text: "Linger Threshold (Frames)"; value: 15 }
-                        }
-                    }
-
-                    // 2: NETWORK TAB
-                    ScrollView {
-                        clip: true
-                        ColumnLayout {
-                            width: parent.width
-                            spacing: 2
-
-                            SettingToggleRow { text: "Auto-Connect to Last Known Pi"; checked: true }
-                            SettingToggleRow { text: "Low Delay Option (TCP NoDelay)"; checked: true }
-
-                            SettingActionRow {
-                                text: "UDP Discovery Port"
-                                buttonText: "5000"
+                            SettingRow {
+                                iconName: "bell"
+                                title: "Desktop notifications"
+                                description: "Show a system notification when someone is at the door."
+                                ToggleSwitch {
+                                    checked: Session.prefs.desktopNotifications
+                                    onToggled: Session.prefs.desktopNotifications = checked
+                                }
+                            }
+                            SettingRow {
+                                iconName: "dashboard"
+                                title: "Bring DoorDarshan to the front"
+                                description: "Open the live view and turn on the camera so you can see who it is."
+                                divider: false
+                                ToggleSwitch {
+                                    checked: Session.prefs.raiseOnAlert
+                                    onToggled: Session.prefs.raiseOnAlert = checked
+                                }
                             }
                         }
                     }
 
-                    // 3: ALERTS TAB
-                    ScrollView {
-                        clip: true
-                        ColumnLayout {
+                    Card {
+                        Layout.fillWidth: true
+                        title: "Your data"
+                        subtitle: "snapshots and face encodings stay on this computer"
+                        iconName: "database"
+
+                        Column {
                             width: parent.width
-                            spacing: 2
-
-                            SettingToggleRow { text: "Enable Desktop Notifications"; checked: true }
-                            SettingToggleRow { text: "Play Audio Chime on PC"; checked: false }
-
-                            SettingSliderRow { text: "Notification Cooldown (Minutes)"; value: 1 }
+                            SettingRow {
+                                iconName: "history"
+                                title: "Visitor history"
+                                description: page.historyCount + (page.historyCount === 1 ? " snapshot" : " snapshots") + " saved"
+                                divider: false
+                                AppButton {
+                                    variant: "danger"
+                                    text: "Clear history"
+                                    enabled: page.historyCount > 0
+                                    onClicked: clearDialog.open()
+                                }
+                            }
                         }
                     }
+                }
 
-                    // 4: ABOUT TAB
-                    ScrollView {
-                        clip: true
-                        ColumnLayout {
-                            width: parent.width
-                            spacing: 2
+                Card {
+                    Layout.preferredWidth: 400
+                    Layout.alignment: Qt.AlignTop
+                    title: "About"
+                    iconName: "info"
 
-                            SettingTextRow { text: "Application Version"; valueText: "v1.0.0 (College Build)" }
-                            SettingTextRow { text: "AI Engine"; valueText: "OpenCV 4.x + YuNet ONNX" }
-                            SettingTextRow { text: "Framework"; valueText: "Qt 6 + GStreamer" }
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: 0
+
+                        RowLayout {
+                            Layout.bottomMargin: 18
+                            spacing: 14
+                            Item {
+                                implicitWidth: 52
+                                implicitHeight: 52
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: 4
+                                    color: Theme.tint(Theme.accent, 0.08)
+                                    border.width: 1
+                                    border.color: Theme.tint(Theme.accent, 0.35)
+                                }
+                                Brackets { color: Theme.accent; length: 9 }
+                                AppIcon {
+                                    anchors.centerIn: parent
+                                    name: "eye"
+                                    color: Theme.accent
+                                    size: 22
+                                    strokeWidth: 2
+                                }
+                            }
+                            ColumnLayout {
+                                spacing: 0
+                                Text {
+                                    text: "DOORDARSHAN LIVE"
+                                    color: Theme.text
+                                    font.family: Theme.fontMono
+                                    font.pixelSize: 15
+                                    font.letterSpacing: 2
+                                }
+                                Text {
+                                    text: "Version " + Qt.application.version
+                                    color: Theme.textMuted
+                                    font.family: Theme.fontMono
+                                    font.pixelSize: 12
+                                }
+                            }
+                        }
+
+                        Repeater {
+                            model: [
+                                { k: "Face recognition", v: "OpenCV YuNet + SFace" },
+                                { k: "Video", v: "RTP/JPEG · UDP 5000" },
+                                { k: "Discovery", v: "UDP broadcast · 40000" },
+                                { k: "Control", v: "TCP · ephemeral port" },
+                                { k: "Built with", v: "Qt 6 · GStreamer" }
+                            ]
+                            RowLayout {
+                                required property var modelData
+                                required property int index
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 34
+                                spacing: 8
+                                Text {
+                                    Layout.preferredWidth: 130
+                                    text: modelData.k
+                                    color: Theme.textMuted
+                                    font.family: Theme.fontMono
+                                    font.pixelSize: 11
+                                    font.letterSpacing: 1
+                                    font.capitalization: Font.AllUppercase
+                                }
+                                Text {
+                                    text: ":"
+                                    color: Theme.textFaint
+                                    font.family: Theme.fontMono
+                                    font.pixelSize: 11
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.v
+                                    color: Theme.text
+                                    font.family: Theme.fontMono
+                                    font.pixelSize: 11
+                                    elide: Text.ElideRight
+                                }
+                            }
                         }
                     }
                 }
@@ -146,125 +206,18 @@ PageFrame {
         }
     }
 
-    // --- REUSABLE INLINE COMPONENTS ---
-
-    component SettingToggleRow: Rectangle {
-        property string text: ""
-        property alias checked: toggle.checked
-
-        Layout.fillWidth: true
-        Layout.preferredHeight: 80
-        color: "black"
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 20
-
-            Label {
-                Layout.fillWidth: true
-                text: parent.parent.text
-                font.family: Theme.jetbrainsFont
-                font.pixelSize: 15
-                color: "white"
-            }
-            CheckBox {
-                id: toggle
-            }
-        }
-    }
-
-    component SettingActionRow: Rectangle {
-        property string text: ""
-        property string buttonText: ""
-        signal clicked()
-
-        Layout.fillWidth: true
-        Layout.preferredHeight: 80
-        color: "black"
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 20
-
-            Label {
-                Layout.fillWidth: true
-                text: parent.parent.text
-                font.family: Theme.jetbrainsFont
-                font.pixelSize: 15
-                color: "white"
-            }
-            SidebarButton {
-                Layout.preferredHeight: 50
-                Layout.preferredWidth: 180
-                text: parent.parent.buttonText
-                fontSize: 14
-                onClicked: parent.parent.clicked()
-            }
-        }
-    }
-
-    component SettingSliderRow: Rectangle {
-        property string text: ""
-        property alias value: slider.value
-
-        Layout.fillWidth: true
-        Layout.preferredHeight: 80
-        color: "black"
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 20
-
-            Label {
-                Layout.fillWidth: true
-                text: parent.parent.text + " [" + Math.round(slider.value) + "]"
-                font.family: Theme.jetbrainsFont
-                font.pixelSize: 15
-                color: "white"
-            }
-            Slider {
-                id: slider
-                Layout.preferredWidth: 200
-                from: 0
-                to: 100
-                stepSize: 1
-            }
-        }
-    }
-
-    component SettingTextRow: Rectangle {
-        property string text: ""
-        property string valueText: ""
-
-        Layout.fillWidth: true
-        Layout.preferredHeight: 80
-        color: "black"
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 20
-
-            Label {
-                Layout.fillWidth: true
-                text: parent.parent.text
-                font.family: Theme.jetbrainsFont
-                font.pixelSize: 15
-                color: "white"
-            }
-            Label {
-                text: parent.parent.valueText
-                font.family: Theme.jetbrainsFont
-                font.pixelSize: 15
-                color: "gray"
-            }
+    AppDialog {
+        id: clearDialog
+        title: "Clear all history?"
+        message: "This removes all " + page.historyCount + " snapshots from History. People you've already named stay saved."
+        iconName: "trash"
+        tone: Theme.danger
+        destructive: true
+        confirmText: "Clear history"
+        onConfirmed: {
+            page.db.clearHistory()
+            Session.historyRevision++
+            Session.notify("History cleared", "success")
         }
     }
 }

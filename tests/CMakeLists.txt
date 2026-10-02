@@ -70,7 +70,9 @@ dd_add_test(tst_tcpconnector)
 dd_add_test(tst_networkmanager)
 dd_add_test(tst_facedetector)
 dd_add_test(tst_videobridge)
+dd_add_test(tst_appcontroller)
 
 # These bind fixed ports (UDP 40000 for discovery, UDP 5000 for video).
 set_tests_properties(tst_networkmanager PROPERTIES RESOURCE_LOCK udp_40000)
 set_tests_properties(tst_videobridge PROPERTIES RESOURCE_LOCK udp_5000)
+set_tests_properties(tst_appcontroller PROPERTIES RESOURCE_LOCK "udp_40000;udp_5000")

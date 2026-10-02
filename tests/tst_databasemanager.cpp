@@ -46,6 +46,11 @@ private slots:
     void nameUnknownVisitorPromotesToIdentity();
     void nameUnknownVisitorRejectsMissingHistory();
     void identitiesForAiSkipsInvalidEncodings();
+    void deleteHistoryLogRemovesOnlyThatEntry();
+    void deleteHistoryLogRejectsMissingId();
+    void removeIdentityTurnsTheirVisitsUnknown();
+    void countVisitsTodayCountsTodaysEvents();
+    void historyTimesAreShownInLocalTime();
 
 private:
     DatabaseManager *m_db = nullptr;
@@ -213,6 +218,63 @@ void TestDatabaseManager::identitiesForAiSkipsInvalidEncodings()
 
     QCOMPARE(forAi.size(), 1);
     QCOMPARE(forAi.first().toMap()["name"].toString(), QString("Valid"));
+}
+
+void TestDatabaseManager::deleteHistoryLogRemovesOnlyThatEntry()
+{
+    QVERIFY(m_db->logHistoryEvent(-1, false, "/tmp/a.jpg"));
+    QVERIFY(m_db->logHistoryEvent(-1, false, "/tmp/b.jpg"));
+    const int doomed = findBy(m_db->getHistoryLogs(), "imagePath", "/tmp/a.jpg")["id"].toInt();
+
+    QVERIFY(m_db->deleteHistoryLog(doomed));
+
+    const QVariantList logs = m_db->getHistoryLogs();
+    QCOMPARE(logs.size(), 1);
+    QCOMPARE(logs.first().toMap()["imagePath"].toString(), QString("/tmp/b.jpg"));
+}
+
+void TestDatabaseManager::deleteHistoryLogRejectsMissingId()
+{
+    QVERIFY(!m_db->deleteHistoryLog(9999));
+}
+
+void TestDatabaseManager::removeIdentityTurnsTheirVisitsUnknown()
+{
+    QVERIFY(m_db->addIdentity("Asha", "", fakeEncoding(1)));
+    const int asha = m_db->getIdentityIdByName("Asha");
+    QVERIFY(m_db->logHistoryEvent(asha, true, "/tmp/asha.jpg"));
+
+    QVERIFY(m_db->removeIdentity(asha));
+
+    const QVariantMap log = m_db->getHistoryLogs().first().toMap();
+    QCOMPARE(log["isKnown"].toBool(), false);
+    QCOMPARE(log["visitorName"].toString(), QString("Unknown Visitor"));
+}
+
+void TestDatabaseManager::countVisitsTodayCountsTodaysEvents()
+{
+    QCOMPARE(m_db->countVisitsToday(), 0);
+    QVERIFY(m_db->logHistoryEvent(-1, false, "/tmp/a.jpg"));
+    QVERIFY(m_db->logHistoryEvent(-1, false, "/tmp/b.jpg"));
+    QSqlQuery old("INSERT INTO History (is_known, image_path, timestamp) "
+                  "VALUES (0, '/tmp/old.jpg', datetime('now', '-3 days'))");
+    QVERIFY(old.isActive());
+
+    QCOMPARE(m_db->countVisitsToday(), 2);
+}
+
+// SQLite stores CURRENT_TIMESTAMP in UTC; the UI must show local time.
+void TestDatabaseManager::historyTimesAreShownInLocalTime()
+{
+    QVERIFY(m_db->logHistoryEvent(-1, false, "/tmp/now.jpg"));
+
+    const QVariantMap log = m_db->getHistoryLogs().first().toMap();
+    const QDateTime shown = QDateTime::fromString(log["iso"].toString(), Qt::ISODate);
+    QVERIFY(shown.isValid());
+    QVERIFY2(qAbs(shown.secsTo(QDateTime::currentDateTime())) < 120,
+             qPrintable(log["iso"].toString()));
+    QCOMPARE(log["timestamp"].toString(),
+             shown.toLocalTime().toString("MMM dd, yyyy - HH:mm"));
 }
 
 QTEST_GUILESS_MAIN(TestDatabaseManager)

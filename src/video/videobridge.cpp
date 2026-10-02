@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMutexLocker>
 #include <QCoreApplication>
+#include <optional>
 
 VideoBridge::VideoBridge(QObject *parent)
     : QObject(parent),
@@ -149,13 +150,17 @@ GstFlowReturn VideoBridge::processFrame(GstAppSink *sink)
                                   Q_ARG(QImage, image.copy()));
     }
 
+    // m_lastDetectedFaces is written on the main thread, so copy it under the lock.
+    std::optional<FaceResult> latestFace;
     {
         QMutexLocker locker(&m_mutex);
         m_currentFrame = image.copy();
+        if (!m_lastDetectedFaces.empty())
+            latestFace = m_lastDetectedFaces.front();
     }
 
-    if (!m_lastDetectedFaces.empty()) {
-        const auto& face = m_lastDetectedFaces.front();
+    if (latestFace) {
+        const FaceResult& face = *latestFace;
         QString detectedName = QString::fromStdString(face.name);
         if (detectedName.trimmed().isEmpty() || detectedName == "Visitor") {
             detectedName = "Unknown";
