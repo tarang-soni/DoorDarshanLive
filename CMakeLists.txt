@@ -20,6 +20,20 @@ target_compile_definitions(appqt_DoorDarshanLive PRIVATE
     DD_APP_VERSION="${PROJECT_VERSION}"
 )
 
+# qmlcachegen compiles QML bindings to C++, and the generated code calls
+# copysign(). With Qt's MinGW kit linking MSYS2 libraries, that symbol fails to
+# resolve ("undefined reference to `copysign'"). Bytecode-only QML avoids the
+# generated C++; the QML still runs precompiled, just through the interpreter/JIT.
+if(MINGW)
+    set(DD_QML_BYTECODE_ONLY_DEFAULT ON)
+else()
+    set(DD_QML_BYTECODE_ONLY_DEFAULT OFF)
+endif()
+option(DD_QML_BYTECODE_ONLY "Compile QML to bytecode only (no generated C++)" ${DD_QML_BYTECODE_ONLY_DEFAULT})
+if(DD_QML_BYTECODE_ONLY)
+    set_target_properties(appqt_DoorDarshanLive PROPERTIES QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode")
+endif()
+
 qt_add_qml_module(appqt_DoorDarshanLive
     URI qt_DoorDarshanLive
 
