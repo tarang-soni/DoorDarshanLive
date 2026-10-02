@@ -71,12 +71,14 @@ void TcpConnector::onReadyRead()
 {
     if (!m_activeClient)
         return;
-    QByteArray data = m_activeClient->readAll();
-    if (data.isEmpty()) return;
-    uint8_t value = static_cast<uint8_t>(data.at(0));
-    ClientResponse resp = static_cast<ClientResponse>(value);
-    qDebug() << GetMessageFromCommand(resp);
-    handleStates(resp);
+    // TCP is a byte stream, so several one-byte responses can arrive in one read.
+    const QByteArray data = m_activeClient->readAll();
+    for (char byte : data)
+    {
+        ClientResponse resp = static_cast<ClientResponse>(static_cast<uint8_t>(byte));
+        qDebug() << GetMessageFromCommand(resp);
+        handleStates(resp);
+    }
 }
 
 void TcpConnector::onSocketDisconnected()

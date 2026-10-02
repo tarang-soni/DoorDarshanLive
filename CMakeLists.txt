@@ -127,3 +127,9 @@ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/models/face_detection_yunet_2023mar.onnx"
      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
  file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/models/face_recognition_sface_2021dec.onnx"
       DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
+option(DD_BUILD_TESTS "Build the Qt Test unit tests" ON)
+if(DD_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
